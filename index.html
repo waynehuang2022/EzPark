@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>停車位管理系統</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- 登入頁面 -->
+        <div id="login-page" class="page active">
+            <div class="container">
+                <div class="auth-container">
+                    <div class="card">
+                        <div class="card__body">
+                            <h2 class="text-center mb-8">停車位管理系統</h2>
+                            <form id="login-form">
+                                <div class="form-group">
+                                    <label class="form-label" for="login-employee-no">工號</label>
+                                    <input type="text" id="login-employee-no" class="form-control" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="login-password">密碼</label>
+                                    <input type="password" id="login-password" class="form-control" required>
+                                </div>
+                                <button type="submit" class="btn btn--primary btn--full-width">登入</button>
+                            </form>
+                            <p class="text-center mt-8">
+                                還沒有帳號？ <a href="#" id="show-register">註冊</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 註冊頁面 -->
+        <div id="register-page" class="page">
+            <div class="container">
+                <div class="auth-container">
+                    <div class="card">
+                        <div class="card__body">
+                            <h2 class="text-center mb-8">註冊新帳號</h2>
+                            <form id="register-form">
+                                <div class="form-group">
+                                    <label class="form-label" for="register-name">姓名</label>
+                                    <input type="text" id="register-name" class="form-control" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="register-employee-no">工號</label>
+                                    <input type="text" id="register-employee-no" class="form-control" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="register-password">密碼</label>
+                                    <input type="password" id="register-password" class="form-control" required>
+                                </div>
+                                <button type="submit" class="btn btn--primary btn--full-width">註冊</button>
+                            </form>
+                            <p class="text-center mt-8">
+                                已有帳號？ <a href="#" id="show-login">登入</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主頁面（車位列表） -->
+        <div id="main-page" class="page">
+            <div class="container">
+                <div class="page-header">
+                    <h1>停車位管理系統</h1>
+                    <div class="header-actions">
+                        <span id="current-user-info"></span>
+                        <button id="logout-btn" class="btn btn--outline">登出</button>
+                    </div>
+                </div>
+
+                <!-- 篩選器 -->
+                <div class="card mb-8">
+                    <div class="card__body">
+                        <div class="filters">
+                            <div class="form-group">
+                                <label class="form-label">棟別</label>
+                                <select id="building-filter" class="form-control">
+                                    <option value="">全部</option>
+                                    <option value="A">A棟</option>
+                                    <option value="B">B棟</option>
+                                    <option value="C">C棟</option>
+                                    <option value="D">D棟</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">車位種類</label>
+                                <select id="type-filter" class="form-control">
+                                    <option value="">全部</option>
+                                    <option value="汽車">汽車</option>
+                                    <option value="機車">機車</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">狀態</label>
+                                <select id="status-filter" class="form-control">
+                                    <option value="">全部</option>
+                                    <option value="開放">開放</option>
+                                    <option value="關閉">關閉</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 車位列表 -->
+                <div class="card">
+                    <div class="card__body">
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>車位號碼</th>
+                                        <th>棟別</th>
+                                        <th>種類</th>
+                                        <th>主人</th>
+                                        <th>狀態</th>
+                                        <th>預約者</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="parking-slots-table">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Super User 管理後台 -->
+        <div id="admin-page" class="page">
+            <div class="container">
+                <div class="admin-header">
+                    <h1>管理後台</h1>
+                    <div class="header-actions">
+                        <span id="admin-user-info"></span>
+                        <button id="back-to-main" class="btn btn--secondary">回到主頁</button>
+                        <button id="admin-logout-btn" class="btn btn--outline">登出</button>
+                    </div>
+                </div>
+
+                <!-- 導航選單 -->
+                <div class="admin-nav">
+                    <button id="show-member-mgmt" class="btn btn--primary">會員管理</button>
+                    <button id="show-parking-mgmt" class="btn btn--secondary">車位管理</button>
+                </div>
+
+                <!-- 會員管理頁面 -->
+                <div id="member-management" class="admin-section active">
+                    <div class="section-header">
+                        <h2>會員管理</h2>
+                        <button id="add-member-btn" class="btn btn--primary">新增會員</button>
+                    </div>
+
+                    <div class="card">
+                        <div class="card__body">
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>姓名</th>
+                                            <th>工號</th>
+                                            <th>角色</th>
+                                            <th>擁有車位數</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="members-table">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 車位管理頁面 -->
+                <div id="parking-management" class="admin-section">
+                    <div class="section-header">
+                        <h2>車位管理</h2>
+                        <button id="add-parking-btn" class="btn btn--primary">新增車位</button>
+                    </div>
+
+                    <div class="card">
+                        <div class="card__body">
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>車位號碼</th>
+                                            <th>棟別</th>
+                                            <th>種類</th>
+                                            <th>主人</th>
+                                            <th>狀態</th>
+                                            <th>預約者</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="admin-parking-table">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模態視窗 -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title"></h3>
+                <button id="modal-close" class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-body">
+            </div>
+        </div>
+    </div>
+
+    <!-- 訊息提示 -->
+    <div id="message" class="message"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
