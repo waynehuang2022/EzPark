@@ -654,45 +654,196 @@ select.form-control {
     format('woff2');
 }
 
-/* Application specific styles */
-
-/* Page management */
+/* 頁面基本樣式 */
 .page {
     display: none;
+    min-height: 100vh;
 }
 
 .page.active {
     display: block;
 }
 
-/* Authentication pages */
-.auth-container {
+/* 登入和註冊頁面樣式 */
+.login-container {
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
     min-height: 100vh;
-    padding: var(--space-20);
+    padding: var(--space-32);
 }
 
-.auth-container .card {
+.login-container .card {
     width: 100%;
     max-width: 400px;
 }
 
-.text-center {
+.login-title {
+    text-align: center;
+    margin-bottom: var(--space-32);
+    color: var(--color-primary);
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-16);
+}
+
+.register-link {
+    margin-top: var(--space-16);
     text-align: center;
 }
 
-.mb-8 {
+/* 導航列 */
+.navbar {
+    background-color: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    padding: var(--space-16) 0;
+    box-shadow: var(--shadow-sm);
+}
+
+.navbar-title {
+    margin: 0;
+    color: var(--color-primary);
+}
+
+.navbar-user {
+    display: flex;
+    align-items: center;
+    gap: var(--space-12);
+}
+
+.user-name {
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-secondary);
+}
+
+/* 管理員導航 */
+.admin-nav {
+    background-color: var(--color-secondary);
+    padding: var(--space-12) 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+/* 內容視圖 */
+.content-view {
+    display: none;
+    padding: var(--space-24) 0;
+}
+
+.content-view.active {
+    display: block;
+}
+
+/* 篩選區域 */
+.filter-section {
+    margin-bottom: var(--space-24);
+}
+
+.filter-controls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-16);
+    margin-top: var(--space-16);
+}
+
+/* 車位列表樣式 */
+.parking-slots {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--space-16);
+}
+
+.parking-slot {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-card-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-16);
+    transition: all var(--duration-normal) var(--ease-standard);
+}
+
+.parking-slot:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.parking-slot-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-12);
+}
+
+.parking-slot-number {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-primary);
+}
+
+.parking-slot-type {
+    font-size: var(--font-size-sm);
+    padding: var(--space-4) var(--space-8);
+    background-color: var(--color-secondary);
+    border-radius: var(--radius-sm);
+}
+
+.parking-slot-info {
+    margin-bottom: var(--space-16);
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
     margin-bottom: var(--space-8);
+    font-size: var(--font-size-sm);
 }
 
-.mt-8 {
-    margin-top: var(--space-8);
+.info-label {
+    color: var(--color-text-secondary);
 }
 
-/* Header styles */
-.page-header, .admin-header {
+.info-value {
+    font-weight: var(--font-weight-medium);
+}
+
+.parking-slot-actions {
+    display: flex;
+    gap: var(--space-8);
+}
+
+.parking-slot-actions .btn {
+    flex: 1;
+    font-size: var(--font-size-sm);
+    padding: var(--space-6) var(--space-12);
+}
+
+/* 狀態指示器 */
+.status-open {
+    background-color: rgba(var(--color-success-rgb), 0.15);
+    color: var(--color-success);
+    border: 1px solid rgba(var(--color-success-rgb), 0.25);
+}
+
+.status-closed {
+    background-color: rgba(var(--color-error-rgb), 0.15);
+    color: var(--color-error);
+    border: 1px solid rgba(var(--color-error-rgb), 0.25);
+}
+
+.status-reserved {
+    background-color: rgba(var(--color-warning-rgb), 0.15);
+    color: var(--color-warning);
+    border: 1px solid rgba(var(--color-warning-rgb), 0.25);
+}
+
+.status-available {
+    background-color: rgba(var(--color-info-rgb), 0.15);
+    color: var(--color-info);
+    border: 1px solid rgba(var(--color-info-rgb), 0.25);
+}
+
+/* 管理頁面樣式 */
+.management-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -701,165 +852,110 @@ select.form-control {
     border-bottom: 1px solid var(--color-border);
 }
 
-.header-actions {
-    display: flex;
-    align-items: center;
+.management-header h2 {
+    margin: 0;
+}
+
+/* 會員列表 */
+.users-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: var(--space-16);
 }
 
-#current-user-info, #admin-user-info {
-    font-weight: var(--font-weight-medium);
-    color: var(--color-text-secondary);
+.user-card {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-card-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-16);
 }
 
-/* Admin navigation */
-.admin-nav {
-    display: flex;
-    gap: var(--space-16);
-    margin-bottom: var(--space-24);
-}
-
-.admin-section {
-    display: none;
-}
-
-.admin-section.active {
-    display: block;
-}
-
-.section-header {
+.user-card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--space-16);
+    margin-bottom: var(--space-12);
 }
 
-/* Filters */
-.filters {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: var(--space-16);
-}
-
-/* Table styles */
-.table-container {
-    overflow-x: auto;
-}
-
-.data-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: var(--font-size-sm);
-}
-
-.data-table th,
-.data-table td {
-    padding: var(--space-12);
-    text-align: left;
-    border-bottom: 1px solid var(--color-border);
-}
-
-.data-table th {
-    background-color: var(--color-secondary);
-    font-weight: var(--font-weight-semibold);
+.user-name {
+    font-weight: var(--font-weight-bold);
     color: var(--color-text);
 }
 
-.data-table tbody tr:nth-child(even) {
-    background-color: var(--color-secondary);
-}
-
-.data-table tbody tr:hover {
-    background-color: var(--color-secondary-hover);
-}
-
-/* Action buttons in tables */
-.action-buttons {
-    display: flex;
-    gap: var(--space-8);
-}
-
-.btn--sm {
-    padding: var(--space-4) var(--space-8);
+.user-role {
     font-size: var(--font-size-xs);
-}
-
-.btn--success {
-    background-color: var(--color-success);
-    color: var(--color-btn-primary-text);
-}
-
-.btn--success:hover {
-    background-color: rgba(var(--color-success-rgb), 0.8);
-}
-
-.btn--danger {
-    background-color: var(--color-error);
-    color: var(--color-btn-primary-text);
-}
-
-.btn--danger:hover {
-    background-color: rgba(var(--color-error-rgb), 0.8);
-}
-
-.btn--warning {
-    background-color: var(--color-warning);
-    color: var(--color-btn-primary-text);
-}
-
-.btn--warning:hover {
-    background-color: rgba(var(--color-warning-rgb), 0.8);
-}
-
-/* Status indicators */
-.status-badge {
-    display: inline-block;
-    padding: var(--space-4) var(--space-8);
-    border-radius: var(--radius-full);
-    font-size: var(--font-size-xs);
+    padding: var(--space-2) var(--space-6);
+    border-radius: var(--radius-sm);
+    text-transform: uppercase;
     font-weight: var(--font-weight-medium);
 }
 
-.status-badge--open {
-    background-color: rgba(var(--color-success-rgb), 0.15);
-    color: var(--color-success);
-    border: 1px solid rgba(var(--color-success-rgb), 0.25);
-}
-
-.status-badge--closed {
-    background-color: rgba(var(--color-error-rgb), 0.15);
-    color: var(--color-error);
-    border: 1px solid rgba(var(--color-error-rgb), 0.25);
-}
-
-.status-badge--reserved {
+.role-super {
     background-color: rgba(var(--color-warning-rgb), 0.15);
     color: var(--color-warning);
-    border: 1px solid rgba(var(--color-warning-rgb), 0.25);
 }
 
-/* Modal styles */
+.role-user {
+    background-color: rgba(var(--color-info-rgb), 0.15);
+    color: var(--color-info);
+}
+
+.user-card-actions {
+    display: flex;
+    gap: var(--space-8);
+    margin-top: var(--space-12);
+}
+
+/* 車位管理列表 */
+.parking-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-16);
+}
+
+.parking-card {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-card-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-16);
+}
+
+.parking-card-actions {
+    display: flex;
+    gap: var(--space-8);
+    margin-top: var(--space-12);
+}
+
+/* 模態框樣式 */
 .modal {
-    display: none;
     position: fixed;
-    z-index: 1000;
-    left: 0;
     top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal.hidden {
+    display: none;
+}
+
+.modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
 }
 
-.modal.active {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
 .modal-content {
+    position: relative;
     background-color: var(--color-surface);
     border-radius: var(--radius-lg);
-    border: 1px solid var(--color-border);
     box-shadow: var(--shadow-lg);
     width: 90%;
     max-width: 500px;
@@ -871,7 +967,7 @@ select.form-control {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--space-16);
+    padding: var(--space-20);
     border-bottom: 1px solid var(--color-border);
 }
 
@@ -882,15 +978,10 @@ select.form-control {
 .modal-close {
     background: none;
     border: none;
-    font-size: var(--font-size-2xl);
+    font-size: var(--font-size-3xl);
     cursor: pointer;
     color: var(--color-text-secondary);
-    padding: 0;
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    line-height: 1;
 }
 
 .modal-close:hover {
@@ -898,10 +989,9 @@ select.form-control {
 }
 
 .modal-body {
-    padding: var(--space-16);
+    padding: var(--space-20);
 }
 
-/* Modal forms */
 .modal-form {
     display: flex;
     flex-direction: column;
@@ -910,118 +1000,86 @@ select.form-control {
 
 .modal-actions {
     display: flex;
-    gap: var(--space-8);
+    gap: var(--space-12);
     justify-content: flex-end;
-    margin-top: var(--space-16);
+    margin-top: var(--space-20);
+    padding-top: var(--space-16);
+    border-top: 1px solid var(--color-border);
 }
 
-/* Message notifications */
-.message {
-    position: fixed;
-    top: var(--space-20);
-    right: var(--space-20);
-    z-index: 1100;
-    padding: var(--space-12) var(--space-16);
-    border-radius: var(--radius-base);
-    font-weight: var(--font-weight-medium);
-    opacity: 0;
-    transform: translateX(100%);
-    transition: all var(--duration-normal) var(--ease-standard);
-    max-width: 400px;
-}
-
-.message.show {
-    opacity: 1;
-    transform: translateX(0);
-}
-
-.message--success {
-    background-color: rgba(var(--color-success-rgb), 0.15);
-    color: var(--color-success);
-    border: 1px solid rgba(var(--color-success-rgb), 0.25);
-}
-
-.message--error {
-    background-color: rgba(var(--color-error-rgb), 0.15);
-    color: var(--color-error);
-    border: 1px solid rgba(var(--color-error-rgb), 0.25);
-}
-
-.message--warning {
-    background-color: rgba(var(--color-warning-rgb), 0.15);
-    color: var(--color-warning);
-    border: 1px solid rgba(var(--color-warning-rgb), 0.25);
-}
-
-/* Form groups in grids */
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: var(--space-16);
-}
-
-/* Checkbox and radio styles */
-.checkbox-group {
+/* 載入動畫 */
+.loading-spinner {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: var(--space-8);
-}
-
-.checkbox-group input[type="checkbox"] {
-    width: 16px;
-    height: 16px;
-    accent-color: var(--color-primary);
-}
-
-/* Loading state */
-.loading {
-    opacity: 0.6;
-    pointer-events: none;
-}
-
-/* Empty state */
-.empty-state {
-    text-align: center;
+    justify-content: center;
     padding: var(--space-32);
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--color-border);
+    border-top: 3px solid var(--color-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-spinner p {
+    margin-top: var(--space-16);
     color: var(--color-text-secondary);
 }
 
-.empty-state h3 {
-    margin-bottom: var(--space-8);
+/* 錯誤訊息 */
+.error-message {
+    padding: var(--space-12);
+    margin-top: var(--space-16);
+    background-color: rgba(var(--color-error-rgb), 0.15);
+    color: var(--color-error);
+    border: 1px solid rgba(var(--color-error-rgb), 0.25);
+    border-radius: var(--radius-base);
+    font-size: var(--font-size-sm);
 }
 
-/* Responsive design */
+.success-message {
+    padding: var(--space-12);
+    margin-top: var(--space-16);
+    background-color: rgba(var(--color-success-rgb), 0.15);
+    color: var(--color-success);
+    border: 1px solid rgba(var(--color-success-rgb), 0.25);
+    border-radius: var(--radius-base);
+    font-size: var(--font-size-sm);
+}
+
+/* 響應式設計 */
 @media (max-width: 768px) {
-    .page-header, .admin-header {
+    .navbar .container {
+        flex-direction: column;
+        gap: var(--space-12);
+    }
+
+    .filter-controls {
+        grid-template-columns: 1fr;
+    }
+
+    .parking-slots {
+        grid-template-columns: 1fr;
+    }
+
+    .management-header {
         flex-direction: column;
         align-items: flex-start;
         gap: var(--space-16);
     }
 
-    .header-actions {
-        width: 100%;
-        justify-content: space-between;
-    }
-
-    .filters {
+    .users-grid,
+    .parking-grid {
         grid-template-columns: 1fr;
-    }
-
-    .admin-nav {
-        flex-direction: column;
-    }
-
-    .action-buttons {
-        flex-direction: column;
-    }
-
-    .data-table {
-        font-size: var(--font-size-xs);
-    }
-
-    .data-table th,
-    .data-table td {
-        padding: var(--space-8);
     }
 
     .modal-content {
@@ -1029,67 +1087,94 @@ select.form-control {
         margin: var(--space-16);
     }
 
-    .modal-actions {
+    .parking-slot-actions {
+        flex-direction: column;
+    }
+
+    .user-card-actions,
+    .parking-card-actions {
         flex-direction: column;
     }
 }
 
-@media (max-width: 480px) {
-    .container {
-        padding-left: var(--space-8);
-        padding-right: var(--space-8);
-    }
-
-    .auth-container {
-        padding: var(--space-16);
-    }
-
-    .section-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: var(--space-16);
-    }
+/* 工具提示 */
+.tooltip {
+    position: relative;
+    display: inline-block;
 }
 
-/* Hide scrollbars but keep functionality */
-.table-container::-webkit-scrollbar {
-    height: 6px;
-}
-
-.table-container::-webkit-scrollbar-track {
-    background: var(--color-secondary);
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 200px;
+    background-color: var(--color-text);
+    color: var(--color-surface);
+    text-align: center;
     border-radius: var(--radius-sm);
+    padding: var(--space-8);
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -100px;
+    opacity: 0;
+    transition: opacity var(--duration-fast);
+    font-size: var(--font-size-sm);
 }
 
-.table-container::-webkit-scrollbar-thumb {
-    background: var(--color-border);
-    border-radius: var(--radius-sm);
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
 }
 
-.table-container::-webkit-scrollbar-thumb:hover {
-    background: var(--color-text-secondary);
-}
-
-/* Focus states for better accessibility */
-.btn:focus-visible,
-.form-control:focus-visible {
-    outline: 2px solid var(--color-primary);
-    outline-offset: 2px;
-}
-
-/* Disabled state for forms */
-.form-control:disabled {
-    background-color: var(--color-secondary);
+/* 空狀態 */
+.empty-state {
+    text-align: center;
+    padding: var(--space-32);
     color: var(--color-text-secondary);
-    cursor: not-allowed;
 }
 
-/* Special styling for owner slots */
-.owner-slot {
-    background-color: rgba(var(--color-primary-rgb, 33, 128, 141), 0.05);
+.empty-state h3 {
+    margin-bottom: var(--space-16);
 }
 
-/* Special styling for reserved slots */
-.reserved-slot {
-    background-color: rgba(var(--color-warning-rgb), 0.05);
+.empty-state p {
+    margin-bottom: var(--space-24);
+}
+
+/* Firebase 連接狀態指示器 */
+.connection-status {
+    position: fixed;
+    top: var(--space-16);
+    right: var(--space-16);
+    padding: var(--space-8) var(--space-12);
+    border-radius: var(--radius-base);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    z-index: 999;
+}
+
+.connection-online {
+    background-color: rgba(var(--color-success-rgb), 0.15);
+    color: var(--color-success);
+    border: 1px solid rgba(var(--color-success-rgb), 0.25);
+}
+
+.connection-offline {
+    background-color: rgba(var(--color-error-rgb), 0.15);
+    color: var(--color-error);
+    border: 1px solid rgba(var(--color-error-rgb), 0.25);
+}
+
+/* 確認對話框 */
+.confirm-dialog {
+    text-align: center;
+}
+
+.confirm-dialog p {
+    margin-bottom: var(--space-24);
+    font-size: var(--font-size-lg);
+}
+
+.confirm-dialog .modal-actions {
+    justify-content: center;
 }
