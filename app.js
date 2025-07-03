@@ -237,119 +237,6 @@ async function initializeTestData() {
   }
 }
 
-/* 渲染函數 */
-function renderParkingSlots() {
-  const container = $('parkingSlots');
-  if (!container) return;
-  
-  if (parking.length === 0) {
-    container.innerHTML = '<div class="text-center"><p>目前沒有車位資料</p></div>';
-    return;
-  }
-  
-  const html = parking.map(slot => {
-    const statusText = getStatusText(slot.status);
-    const isOwner = currentUser && slot.ownerId === currentUser.employeeNo;
-    const isReservedByMe = slot.reservedBy === currentUser?.employeeNo;
-    
-    // 重新設計按鈕顯示邏輯
-    let actionButtons = '';
-    
-    if (isOwner) {
-      // 車位主人可以控制自己的車位
-      if (slot.status === 'closed') {
-        actionButtons += `<button class="btn btn--success btn--sm" onclick="openSlot('${slot.id}')">開放車位</button>`;
-      } else if (slot.status === 'open') {
-        actionButtons += `<button class="btn btn--warning btn--sm" onclick="closeSlot('${slot.id}')">關閉車位</button>`;
-      } else if (slot.status === 'reserved') {
-        actionButtons += `<button class="btn btn--outline btn--sm" onclick="openSlot('${slot.id}')">清除預約並開放</button>`;
-      }
-    } else {
-      // 非車位主人的操作
-      if (slot.status === 'open') {
-        actionButtons += `<button class="btn btn--primary btn--sm" onclick="reserveSlot('${slot.id}')">預約車位</button>`;
-      } else if (isReservedByMe) {
-        actionButtons += `<button class="btn btn--outline btn--sm" onclick="cancelReservation('${slot.id}')">取消預約</button>`;
-      }
-    }
-    
-    return `
-      <div class="parking-slot">
-        <div class="parking-slot-header">
-          <span>${slot.slotNo}</span>
-          <span class="status-${slot.status}">${statusText}</span>
-        </div>
-        <div class="parking-slot-info">
-          <p><strong>棟別：</strong>${slot.building}棟</p>
-          <p><strong>種類：</strong>${slot.type}</p>
-          <p><strong>主人：</strong>${slot.ownerName || '未分配'}</p>
-          ${slot.reservedBy ? `<p><strong>預約人：</strong>${getUserNameByEmployeeNo(slot.reservedBy)}</p>` : ''}
-          ${isOwner ? '<p class="owner-badge"><strong>✓ 您是車位主人</strong></p>' : ''}
-        </div>
-        <div class="parking-slot-actions">
-          ${actionButtons}
-        </div>
-      </div>
-    `;
-  }).join('');
-  
-  container.innerHTML = html;
-}
-
-function renderUsers() {
-  const container = $('usersList');
-  if (!container) {
-    console.error('找不到 usersList 元素');
-    return;
-  }
-  
-  console.log('渲染用戶列表，當前用戶:', currentUser);
-  console.log('用戶資料:', users);
-  
-  if (currentUser?.role !== 'super') {
-    container.innerHTML = '<div class="text-center"><p>需要管理員權限才能查看</p></div>';
-    return;
-  }
-  
-  if (users.length === 0) {
-    container.innerHTML = '<div class="text-center"><p>目前沒有會員資料</p></div>';
-    return;
-  }
-  
-  const html = users.map(user => `
-    <div class="user-card">
-      <div class="user-card-header">
-        <span class="user-name">${user.name}</span>
-        <span class="user-role">${user.role === 'super' ? '管理員' : '一般用戶'}</span>
-      </div>
-      <div class="user-info">
-        <p><strong>工號：</strong>${user.employeeNo}</p>
-        <p><strong>角色：</strong>${user.role === 'super' ? '管理員' : '一般用戶'}</p>
-      </div>
-      <div class="user-card-actions">
-        <button class="btn btn--outline btn--sm" onclick="editUser('${user.id}')">編輯</button>
-        ${user.role !== 'super' ? `<button class="btn btn--outline btn--sm" onclick="deleteUser('${user.id}')">刪除</button>` : ''}
-      </div>
-    </div>
-  `).join('');
-  
-  container.innerHTML = html;
-}
-function clearFilters() {
-  const buildingFilter = $('buildingFilter');
-  const typeFilter = $('typeFilter');
-  const statusFilter = $('statusFilter');
-  
-  if (buildingFilter) buildingFilter.value = '';
-  if (typeFilter) typeFilter.value = '';
-  if (statusFilter) statusFilter.value = '';
-  
-  console.log('已清除所有篩選條件');
-  renderParkingSlots();
-}
-
-// 將函數暴露到全域
-window.clearFilters = clearFilters;
 function renderParkingSlots() {
   const container = $('parkingSlots');
   if (!container) return;
@@ -431,6 +318,104 @@ function renderParkingSlots() {
       </div>
     `;
   }).join('');
+  
+  container.innerHTML = html;
+}
+
+function renderUsers() {
+  const container = $('usersList');
+  if (!container) {
+    console.error('找不到 usersList 元素');
+    return;
+  }
+  
+  console.log('渲染用戶列表，當前用戶:', currentUser);
+  console.log('用戶資料:', users);
+  
+  if (currentUser?.role !== 'super') {
+    container.innerHTML = '<div class="text-center"><p>需要管理員權限才能查看</p></div>';
+    return;
+  }
+  
+  if (users.length === 0) {
+    container.innerHTML = '<div class="text-center"><p>目前沒有會員資料</p></div>';
+    return;
+  }
+  
+  const html = users.map(user => `
+    <div class="user-card">
+      <div class="user-card-header">
+        <span class="user-name">${user.name}</span>
+        <span class="user-role">${user.role === 'super' ? '管理員' : '一般用戶'}</span>
+      </div>
+      <div class="user-info">
+        <p><strong>工號：</strong>${user.employeeNo}</p>
+        <p><strong>角色：</strong>${user.role === 'super' ? '管理員' : '一般用戶'}</p>
+      </div>
+      <div class="user-card-actions">
+        <button class="btn btn--outline btn--sm" onclick="editUser('${user.id}')">編輯</button>
+        ${user.role !== 'super' ? `<button class="btn btn--outline btn--sm" onclick="deleteUser('${user.id}')">刪除</button>` : ''}
+      </div>
+    </div>
+  `).join('');
+  
+  container.innerHTML = html;
+}
+// 清除篩選條件
+function clearFilters() {
+  const buildingFilter = $('buildingFilter');
+  const typeFilter = $('typeFilter');
+  const statusFilter = $('statusFilter');
+  
+  if (buildingFilter) buildingFilter.value = '';
+  if (typeFilter) typeFilter.value = '';
+  if (statusFilter) statusFilter.value = '';
+  
+  console.log('已清除所有篩選條件');
+  renderParkingSlots();
+}
+
+// 將函數暴露到全域
+window.clearFilters = clearFilters;
+function renderParkingManagement() {
+  const container = $('parkingManagementList');
+  if (!container) {
+    console.error('找不到 parkingManagementList 元素');
+    return;
+  }
+  
+  console.log('渲染車位管理，當前用戶:', currentUser);
+  console.log('車位資料:', parking);
+  
+  if (currentUser?.role !== 'super') {
+    container.innerHTML = '<div class="text-center"><p>需要管理員權限才能查看</p></div>';
+    return;
+  }
+  
+  if (parking.length === 0) {
+    container.innerHTML = '<div class="text-center"><p>目前沒有車位資料</p></div>';
+    return;
+  }
+  
+  const html = parking.map(slot => `
+    <div class="parking-card">
+      <div class="parking-slot-header">
+        <span>${slot.slotNo}</span>
+        <span class="status-${slot.status}">${getStatusText(slot.status)}</span>
+      </div>
+      <div class="parking-info">
+        <p><strong>棟別：</strong>${slot.building}棟</p>
+        <p><strong>種類：</strong>${slot.type}</p>
+        <p><strong>主人：</strong>${slot.ownerName || '未分配'}</p>
+        <p><strong>狀態：</strong>${getStatusText(slot.status)}</p>
+      </div>
+      <div class="parking-card-actions">
+        <button class="btn btn--outline btn--sm" onclick="editParking('${slot.id}')">編輯</button>
+        <button class="btn btn--outline btn--sm" onclick="assignOwner('${slot.id}')">分配主人</button>
+        <button class="btn btn--outline btn--sm" onclick="deleteParking('${slot.id}')">刪除</button>
+      </div>
+    </div>
+  `).join('');
   
   container.innerHTML = html;
 }
@@ -1017,7 +1002,8 @@ function setupEventListeners() {
       showAddParkingModal();
     });
   }
-    // =============== 新增：篩選器事件監聽 ===============
+
+  // =============== 新增：篩選器事件監聽 ===============
   const buildingFilter = $('buildingFilter');
   const typeFilter = $('typeFilter');
   const statusFilter = $('statusFilter');
