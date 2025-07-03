@@ -3,8 +3,8 @@
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
+//import { initializeApp } from "firebase/app";
+//import { getAnalytics } from "firebase/analytics";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -29,28 +29,28 @@ let useLocalStorage = isTestMode;
 // 如果不是測試模式，嘗試初始化Firebase
 if (!isTestMode) {
     try {
-        // 導入 Firebase 模塊
-        // const { initializeApp } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js');
-        // const { 
-        //     getFirestore, 
-        //     collection, 
-        //     doc, 
-        //     getDocs, 
-        //     getDoc,
-        //     addDoc, 
-        //     updateDoc, 
-        //     deleteDoc, 
-        //     onSnapshot,
-        //     query,
-        //     where,
-        //     orderBy 
-        // } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+        導入 Firebase 模塊
+        const { initializeApp } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js');
+        const { 
+            getFirestore, 
+            collection, 
+            doc, 
+            getDocs, 
+            getDoc,
+            addDoc, 
+            updateDoc, 
+            deleteDoc, 
+            onSnapshot,
+            query,
+            where,
+            orderBy 
+        } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
 
         // 初始化 Firebase
         // Initialize Firebase
 
         app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
+        //const analytics = getAnalytics(app);
         db = getFirestore(app);
         
         // 測試Firebase連接
