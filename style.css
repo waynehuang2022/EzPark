@@ -104,7 +104,15 @@ body {
   color: var(--color-primary);
   margin-bottom: 24px;
 }
+/* 登入和註冊按鈕間距調整 */
+.card__body .btn--secondary {
+  margin-top: 20px;
+}
 
+/* 確保登入表單與註冊按鈕間有適當間距 */
+.login-form {
+  margin-bottom: 16px;
+}
 /* 導覽列 */
 .navbar {
   background: var(--color-surface);
