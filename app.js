@@ -1,30 +1,16 @@
 // Firebase 配置 - 請替換為您的實際 Firebase 配置
-const firebaseConfig = {
-  apiKey: "AIzaSyDdERse0mjGpwlHSZGo2WA8tFGSE235Bz8",
-  authDomain: "mypark-42e1d.firebaseapp.com",
-  projectId: "mypark-42e1d",
-  storageBucket: "mypark-42e1d.firebasestorage.app",
-  messagingSenderId: "893866513050",
-  appId: "1:893866513050:web:f52586fd9eea28aa354523",
-  measurementId: "G-HC2PK22D2J"
-};
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-// const firebaseConfig = {
-//   apiKey: "AIzaSyDdERse0mjGpwlHSZGo2WA8tFGSE235Bz8",
-//   authDomain: "mypark-42e1d.firebaseapp.com",
-//   projectId: "mypark-42e1d",
-//   storageBucket: "mypark-42e1d.firebasestorage.app",
-//   messagingSenderId: "893866513050",
-//   appId: "1:893866513050:web:f52586fd9eea28aa354523",
-//   measurementId: "G-HC2PK22D2J"
-// };
+ const firebaseConfig = {
+   apiKey: "AIzaSyDdERse0mjGpwlHSZGo2WA8tFGSE235Bz8",
+   authDomain: "mypark-42e1d.firebaseapp.com",
+   projectId: "mypark-42e1d",
+   storageBucket: "mypark-42e1d.firebasestorage.app",
+   messagingSenderId: "893866513050",
+   appId: "1:893866513050:web:f52586fd9eea28aa354523",
+   measurementId: "G-HC2PK22D2J"
+ };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
