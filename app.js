@@ -250,10 +250,28 @@ function renderParkingSlots() {
   const html = parking.map(slot => {
     const statusText = getStatusText(slot.status);
     const isOwner = currentUser && slot.ownerId === currentUser.employeeNo;
-    const canReserve = slot.status === 'open' && !isOwner;
-    const canOpen = isOwner && slot.status === 'closed';
-    const canClose = isOwner && slot.status === 'open';
-    const canCancelReservation = slot.reservedBy === currentUser?.employeeNo;
+    const isReservedByMe = slot.reservedBy === currentUser?.employeeNo;
+    
+    // 重新設計按鈕顯示邏輯
+    let actionButtons = '';
+    
+    if (isOwner) {
+      // 車位主人可以控制自己的車位
+      if (slot.status === 'closed') {
+        actionButtons += `<button class="btn btn--success btn--sm" onclick="openSlot('${slot.id}')">開放車位</button>`;
+      } else if (slot.status === 'open') {
+        actionButtons += `<button class="btn btn--warning btn--sm" onclick="closeSlot('${slot.id}')">關閉車位</button>`;
+      } else if (slot.status === 'reserved') {
+        actionButtons += `<button class="btn btn--outline btn--sm" onclick="openSlot('${slot.id}')">清除預約並開放</button>`;
+      }
+    } else {
+      // 非車位主人的操作
+      if (slot.status === 'open') {
+        actionButtons += `<button class="btn btn--primary btn--sm" onclick="reserveSlot('${slot.id}')">預約車位</button>`;
+      } else if (isReservedByMe) {
+        actionButtons += `<button class="btn btn--outline btn--sm" onclick="cancelReservation('${slot.id}')">取消預約</button>`;
+      }
+    }
     
     return `
       <div class="parking-slot">
@@ -266,12 +284,10 @@ function renderParkingSlots() {
           <p><strong>種類：</strong>${slot.type}</p>
           <p><strong>主人：</strong>${slot.ownerName || '未分配'}</p>
           ${slot.reservedBy ? `<p><strong>預約人：</strong>${getUserNameByEmployeeNo(slot.reservedBy)}</p>` : ''}
+          ${isOwner ? '<p class="owner-badge"><strong>✓ 您是車位主人</strong></p>' : ''}
         </div>
         <div class="parking-slot-actions">
-          ${canReserve ? `<button class="btn btn--primary btn--sm" onclick="reserveSlot('${slot.id}')">預約</button>` : ''}
-          ${canOpen ? `<button class="btn btn--success btn--sm" onclick="openSlot('${slot.id}')">開放</button>` : ''}
-          ${canClose ? `<button class="btn btn--warning btn--sm" onclick="closeSlot('${slot.id}')">關閉</button>` : ''}
-          ${canCancelReservation ? `<button class="btn btn--outline btn--sm" onclick="cancelReservation('${slot.id}')">取消預約</button>` : ''}
+          ${actionButtons}
         </div>
       </div>
     `;
@@ -632,6 +648,22 @@ function editParking(parkingId) {
           <option value="D" ${slot.building === 'D' ? 'selected' : ''}>D棟</option>
         </select>
       </div>
+      <div class="form-group">
+        <label class="form-label">車位狀態</label>
+        <select id="editSlotStatus" class="form-control">
+          <option value="available" ${slot.status === 'available' ? 'selected' : ''}>可分配</option>
+          <option value="open" ${slot.status === 'open' ? 'selected' : ''}>開放中</option>
+          <option value="closed" ${slot.status === 'closed' ? 'selected' : ''}>關閉</option>
+          <option value="reserved" ${slot.status === 'reserved' ? 'selected' : ''}>已預約</option>
+        </select>
+      </div>
+      ${slot.status === 'reserved' ? `
+        <div class="form-group">
+          <label class="form-label">當前預約人</label>
+          <input type="text" class="form-control" value="${getUserNameByEmployeeNo(slot.reservedBy)} (${slot.reservedBy})" readonly>
+          <small class="form-text">如需清除預約，請將狀態改為「開放中」或「關閉」</small>
+        </div>
+      ` : ''}
       <div class="modal-actions">
         <button type="button" class="btn btn--outline" onclick="hideModal()">取消</button>
         <button type="submit" class="btn btn--primary">更新</button>
@@ -647,10 +679,19 @@ async function updateParking(event, parkingId) {
     const slotNo = $('editSlotNo').value;
     const type = $('editSlotType').value;
     const building = $('editSlotBuilding').value;
+    const status = $('editSlotStatus').value;
     
-    await updateDoc(doc(db, 'parking', parkingId), { slotNo, type, building });
+    // 準備更新資料
+    const updateData = { slotNo, type, building, status };
+    
+    // 如果狀態改為非預約狀態，清除預約資訊
+    if (status !== 'reserved') {
+      updateData.reservedBy = null;
+    }
+    
+    await updateDoc(doc(db, 'parking', parkingId), updateData);
     hideModal();
-    alert('更新成功！');
+    alert('車位更新成功！');
   } catch (error) {
     console.error('更新車位失敗:', error);
     alert('更新失敗：' + error.message);
