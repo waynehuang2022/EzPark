@@ -12,9 +12,6 @@
    measurementId: "G-HC2PK22D2J"
  };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
 // 檢測是否為測試環境（Firebase配置未設置）
 const isTestMode = firebaseConfig.apiKey === "YOUR_API_KEY";
 
