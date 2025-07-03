@@ -3,7 +3,7 @@ name: Daily Parking Reset
 on:
   schedule:
     # 每天 UTC 08:00 執行（台灣時間 16:00）
-    - cron: '30 8 * * *'
+    - cron: '40 8 * * *'
   workflow_dispatch: # 允許手動觸發
 
 jobs:
