@@ -29,7 +29,7 @@ let useLocalStorage = isTestMode;
 // 如果不是測試模式，嘗試初始化Firebase
 if (!isTestMode) {
     try {
-        導入 Firebase 模塊
+        //導入 Firebase 模塊
         const { initializeApp } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js');
         const { 
             getFirestore, 
