@@ -2,15 +2,23 @@
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
- const firebaseConfig = {
-   apiKey: "AIzaSyDdERse0mjGpwlHSZGo2WA8tFGSE235Bz8",
-   authDomain: "mypark-42e1d.firebaseapp.com",
-   projectId: "mypark-42e1d",
-   storageBucket: "mypark-42e1d.firebasestorage.app",
-   messagingSenderId: "893866513050",
-   appId: "1:893866513050:web:f52586fd9eea28aa354523",
-   measurementId: "G-HC2PK22D2J"
- };
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyDdERse0mjGpwlHSZGo2WA8tFGSE235Bz8",
+  authDomain: "mypark-42e1d.firebaseapp.com",
+  projectId: "mypark-42e1d",
+  storageBucket: "mypark-42e1d.firebasestorage.app",
+  messagingSenderId: "893866513050",
+  appId: "1:893866513050:web:f52586fd9eea28aa354523",
+  measurementId: "G-HC2PK22D2J"
+};
 
 // 檢測是否為測試環境（Firebase配置未設置）
 const isTestMode = firebaseConfig.apiKey === "YOUR_API_KEY";
@@ -22,24 +30,27 @@ let useLocalStorage = isTestMode;
 if (!isTestMode) {
     try {
         // 導入 Firebase 模塊
-        const { initializeApp } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js');
-        const { 
-            getFirestore, 
-            collection, 
-            doc, 
-            getDocs, 
-            getDoc,
-            addDoc, 
-            updateDoc, 
-            deleteDoc, 
-            onSnapshot,
-            query,
-            where,
-            orderBy 
-        } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
+        // const { initializeApp } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js');
+        // const { 
+        //     getFirestore, 
+        //     collection, 
+        //     doc, 
+        //     getDocs, 
+        //     getDoc,
+        //     addDoc, 
+        //     updateDoc, 
+        //     deleteDoc, 
+        //     onSnapshot,
+        //     query,
+        //     where,
+        //     orderBy 
+        // } = await import('https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js');
 
         // 初始化 Firebase
+        // Initialize Firebase
+
         app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
         db = getFirestore(app);
         
         // 測試Firebase連接
