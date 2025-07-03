@@ -1,81 +1,296 @@
-/* ---------- 基本變數 ---------- */
+/* 基本變數與字型 */
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
 
 :root {
   --color-primary: #21808d;
   --color-primary-hover: #1d7480;
-  --color-primary-active: #1a6873;
   --color-secondary: #5e5240;
   --color-bg: #fcfcf9;
   --color-surface: #ffffff;
   --color-text: #13343b;
   --color-border: #d1d5db;
   --color-error: #dc2626;
+  --color-success: #16a34a;
+  --color-warning: #ea580c;
   --radius-base: 8px;
   --shadow-sm: 0 1px 2px rgba(0,0,0,.05);
-  --shadow-md: 0 2px 4px rgba(0,0,0,.08);
+  --shadow-md: 0 4px 6px rgba(0,0,0,.1);
   --space-2: 8px;
   --space-4: 16px;
 }
 
-/* ---------- 全域 ---------- */
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Noto Sans TC',sans-serif;background:var(--color-bg);color:var(--color-text);line-height:1.6}
+/* 全域樣式 */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { 
+  font-family: 'Noto Sans TC', sans-serif; 
+  background: var(--color-bg); 
+  color: var(--color-text); 
+  line-height: 1.6; 
+}
 
-/* ---------- 通用區塊 ---------- */
-.page{display:none}.page.active{display:block}
-.content-view{display:none}.content-view.active{display:block}
-.hidden{display:none}
+/* 頁面控制 */
+.page { display: none; }
+.page.active { display: block; }
+.content-view { display: none; }
+.content-view.active { display: block; }
+.hidden { display: none !important; }
 
-/* ---------- 按鈕 ---------- */
-.btn{display:inline-flex;align-items:center;justify-content:center;padding:8px 16px;border-radius:var(--radius-base);font-size:14px;font-weight:500;cursor:pointer;border:0;transition:.2s}
-.btn--primary{background:var(--color-primary);color:#fff}
-.btn--primary:hover{background:var(--color-primary-hover)}
-.btn--primary:active{background:var(--color-primary-active)}
-.btn--secondary{background:var(--color-secondary);color:#fff}
-.btn--outline{background:#fff;border:1px solid var(--color-border)}
-.btn--full-width{width:100%}
-.btn--sm{padding:4px 12px;font-size:12px}
+/* 按鈕樣式 */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  border-radius: var(--radius-base);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 0;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+.btn--primary { background: var(--color-primary); color: #fff; }
+.btn--primary:hover { background: var(--color-primary-hover); }
+.btn--secondary { background: var(--color-secondary); color: #fff; }
+.btn--outline { background: #fff; border: 1px solid var(--color-border); color: var(--color-text); }
+.btn--outline:hover { background: #f9fafb; }
+.btn--success { background: var(--color-success); color: #fff; }
+.btn--warning { background: var(--color-warning); color: #fff; }
+.btn--full-width { width: 100%; }
+.btn--sm { padding: 6px 12px; font-size: 12px; }
 
-/* ---------- 表單 ---------- */
-.form-group{margin-bottom:var(--space-4)}
-.form-label{display:block;margin-bottom:4px;font-size:13px;font-weight:500}
-.form-control{width:100%;padding:8px 12px;border:1px solid var(--color-border);border-radius:var(--radius-base)}
+/* 表單樣式 */
+.form-group { margin-bottom: var(--space-4); }
+.form-label { 
+  display: block; 
+  margin-bottom: 4px; 
+  font-size: 13px; 
+  font-weight: 500; 
+  color: var(--color-text);
+}
+.form-control {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-base);
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+.form-control:focus { 
+  outline: none; 
+  border-color: var(--color-primary); 
+}
 
-/* ---------- 卡片 ---------- */
-.card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-base);box-shadow:var(--shadow-sm)}
-.card__body{padding:24px}
+/* 卡片樣式 */
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-base);
+  box-shadow: var(--shadow-sm);
+}
+.card__body { padding: 24px; }
 
-/* ---------- 版面 ---------- */
-.login-container{display:flex;justify-content:center;align-items:center;min-height:100vh;padding:16px}
-.login-title{text-align:center;font-size:24px;color:var(--color-primary);margin-bottom:24px}
+/* 登入頁面 */
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 16px;
+}
+.login-title {
+  text-align: center;
+  font-size: 24px;
+  color: var(--color-primary);
+  margin-bottom: 24px;
+}
 
-.navbar{background:var(--color-surface);border-bottom:1px solid var(--color-border);padding:12px 0}
-.navbar-title{color:var(--color-primary);font-size:20px;font-weight:600}
-.container{max-width:1200px;margin:0 auto;padding:0 16px}
-.flex{display:flex}.justify-between{justify-content:space-between}.items-center{align-items:center}.gap-8{gap:8px}
+/* 導覽列 */
+.navbar {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  padding: 12px 0;
+}
+.navbar-title {
+  color: var(--color-primary);
+  font-size: 20px;
+  font-weight: 600;
+}
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+.flex { display: flex; }
+.justify-between { justify-content: space-between; }
+.items-center { align-items: center; }
+.gap-8 { gap: 8px; }
 
-.admin-nav{background:#f3f4f6;border-bottom:1px solid var(--color-border);padding:8px 0}
+/* 管理員選單 */
+.admin-nav {
+  background: #f3f4f6;
+  border-bottom: 1px solid var(--color-border);
+  padding: 12px 0;
+}
 
-/* ---------- 車位卡片 ---------- */
-.parking-slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
-.parking-slot{padding:16px;border:1px solid var(--color-border);border-radius:var(--radius-base);background:#fff;box-shadow:var(--shadow-sm)}
-.parking-slot-header{display:flex;justify-content:space-between;margin-bottom:8px}
-.status-open{color:#16a34a}.status-closed{color:#dc2626}.status-reserved{color:#ea580c}.status-available{color:#0369a1}
+/* 管理頁面 */
+.management-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--color-border);
+}
 
-/* ---------- 會員／車位管理 ---------- */
-.users-grid,.parking-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
-.management-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
-.user-card,.parking-card{padding:16px;border:1px solid var(--color-border);border-radius:var(--radius-base);background:#fff;box-shadow:var(--shadow-sm)}
+/* 篩選區域 */
+.filter-section {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: var(--color-surface);
+  border-radius: var(--radius-base);
+  border: 1px solid var(--color-border);
+}
+.filter-controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
 
-/* ---------- 模態框 ---------- */
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:50}
-.modal.active{display:flex}
-.modal-content{background:#fff;border-radius:var(--radius-base);width:90%;max-width:500px;max-height:90vh;overflow:auto;box-shadow:var(--shadow-md)}
-.modal-header{display:flex;justify-content:space-between;align-items:center;padding:16px;border-bottom:1px solid var(--color-border)}
-.modal-body{padding:16px}
+/* 車位卡片 */
+.parking-slots {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+.parking-slot {
+  padding: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-base);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+.parking-slot-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+.parking-slot-actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
 
-/* ---------- 載入動畫 ---------- */
-.loading-spinner{display:none;flex-direction:column;align-items:center;justify-content:center;padding:32px}
-.spinner{width:32px;height:32px;border:3px solid var(--color-border);border-top:3px solid var(--color-primary);border-radius:50%;animation:spin 1s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
+/* 狀態顏色 */
+.status-open { color: var(--color-success); }
+.status-closed { color: var(--color-error); }
+.status-reserved { color: var(--color-warning); }
+.status-available { color: var(--color-primary); }
+
+/* 會員與車位管理網格 */
+.users-grid, .parking-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+.user-card, .parking-card {
+  padding: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-base);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+.user-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.user-name {
+  font-weight: 600;
+  font-size: 16px;
+}
+.user-role {
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background: var(--color-primary);
+  color: white;
+}
+.user-card-actions, .parking-card-actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* 模態框 */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.5);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal.active { display: flex; }
+.modal-content {
+  background: var(--color-surface);
+  border-radius: var(--radius-base);
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow: auto;
+  box-shadow: var(--shadow-md);
+}
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+.modal-body { padding: 16px; }
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--color-text);
+}
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+/* 錯誤訊息 */
+.error-message {
+  color: var(--color-error);
+  margin-top: 8px;
+  font-size: 13px;
+  padding: 8px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-base);
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+  .container { padding: 0 12px; }
+  .filter-controls { grid-template-columns: 1fr; }
+  .parking-slots, .users-grid, .parking-grid { 
+    grid-template-columns: 1fr; 
+  }
+  .management-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+}

@@ -1,4 +1,4 @@
-/* 完整版 app.js - 包含 Super User 功能 */
+/* 完整修正版 app.js - 解決所有按鈕和顯示問題 */
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
 import {
   getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc,
@@ -14,262 +14,411 @@ const firebaseConfig = {
   messagingSenderId: '893866513050',
   appId: '1:893866513050:web:f52586fd9eea28aa354523'
 };
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
 
-/* DOM 元素快捷 */
-const $ = id => document.getElementById(id);
-const el = {
-  loginPage: $('loginPage'),
-  registerPage: $('registerPage'),
-  mainApp: $('mainApp'),
-  loginForm: $('loginForm'),
-  registerForm: $('registerForm'),
-  showRegister: $('showRegister'),
-  showLogin: $('showLogin'),
-  loginError: $('loginError'),
-  registerError: $('registerError'),
-  employeeNo: $('employeeNo'),
-  password: $('password'),
-  regName: $('regName'),
-  regEmployeeNo: $('regEmployeeNo'),
-  regPassword: $('regPassword'),
-  currentUser: $('currentUser'),
-  logoutBtn: $('logoutBtn'),
-  adminNav: $('adminNav'),
-  showParkingView: $('showParkingView'),
-  showUserManagement: $('showUserManagement'),
-  showParkingManagement: $('showParkingManagement'),
-  parkingView: $('parkingView'),
-  userManagement: $('userManagement'),
-  parkingManagement: $('parkingManagement'),
-  parkingSlots: $('parkingSlots'),
-  usersList: $('usersList'),
-  parkingManagementList: $('parkingManagementList'),
-  modal: $('modal'),
-  modalTitle: $('modalTitle'),
-  modalBody: $('modalBody'),
-  modalClose: $('modalClose'),
-  addUserBtn: $('addUserBtn'),
-  addParkingBtn: $('addParkingBtn')
-};
-
-/* 應用狀態 */
+let app, db;
 let currentUser = null;
 let parking = [];
 let users = [];
 
-/* 初始測試資料 */
-const initData = {
-  users: [
-    {
-      name: "系統管理員",
-      employeeNo: "dedustb46", 
-      password: "test0000",
-      role: "super"
-    },
-    {
-      name: "張三",
-      employeeNo: "EMP001",
-      password: "password123", 
-      role: "user"
-    }
-  ],
-  parking: [
-    {
-      slotNo: "A001",
-      type: "汽車",
-      building: "A",
-      ownerId: "EMP001",
-      ownerName: "張三",
-      status: "open",
-      reservedBy: null
-    }
-  ]
-};
+/* 初始化 Firebase */
+async function initFirebase() {
+  try {
+    app = initializeApp(firebaseConfig);
+    db = getFirestore(app);
+    console.log('Firebase 初始化成功');
+    return true;
+  } catch (error) {
+    console.error('Firebase 初始化失敗:', error);
+    return false;
+  }
+}
+
+/* DOM 元素快捷函數 */
+const $ = id => document.getElementById(id);
 
 /* 工具函數 */
-const showPage = p => {
-  document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
-  el[p].classList.add('active');
-};
+function showPage(pageId) {
+  document.querySelectorAll('.page').forEach(page => {
+    page.classList.remove('active');
+  });
+  const targetPage = $(pageId);
+  if (targetPage) {
+    targetPage.classList.add('active');
+  }
+}
 
-const showView = v => {
-  document.querySelectorAll('.content-view').forEach(x => x.classList.remove('active'));
-  el[v].classList.add('active');
+function showView(viewId) {
+  document.querySelectorAll('.content-view').forEach(view => {
+    view.classList.remove('active');
+  });
+  const targetView = $(viewId);
+  if (targetView) {
+    targetView.classList.add('active');
+  }
   
   // 更新按鈕樣式
-  document.querySelectorAll('#adminNav .btn').forEach(btn => {
+  const adminNavButtons = document.querySelectorAll('#adminNav .btn');
+  adminNavButtons.forEach(btn => {
     btn.classList.remove('btn--primary');
     btn.classList.add('btn--outline');
   });
   
-  if (v === 'parkingView') el.showParkingView.classList.replace('btn--outline', 'btn--primary');
-  if (v === 'userManagement') el.showUserManagement.classList.replace('btn--outline', 'btn--primary');
-  if (v === 'parkingManagement') el.showParkingManagement.classList.replace('btn--outline', 'btn--primary');
-};
-
-const showError = (id, msg) => {
-  const e = el[id];
-  e.textContent = msg;
-  e.classList.remove('hidden');
-  setTimeout(() => e.classList.add('hidden'), 4000);
-};
-
-const showModal = (title, content) => {
-  el.modalTitle.textContent = title;
-  el.modalBody.innerHTML = content;
-  el.modal.classList.remove('hidden');
-};
-
-const hideModal = () => {
-  el.modal.classList.add('hidden');
-};
-
-/* 認證功能 */
-async function login(emp, pwd) {
-  const q = query(collection(db, 'users'), where('employeeNo', '==', emp));
-  const rs = await getDocs(q);
-  if (rs.empty) throw new Error('找不到此工號');
-  const u = { id: rs.docs[0].id, ...rs.docs[0].data() };
-  if (u.password !== pwd) throw new Error('密碼錯誤');
-  return u;
+  // 設定當前活動按鈕
+  if (viewId === 'parkingView' && $('showParkingView')) {
+    $('showParkingView').classList.remove('btn--outline');
+    $('showParkingView').classList.add('btn--primary');
+  } else if (viewId === 'userManagement' && $('showUserManagement')) {
+    $('showUserManagement').classList.remove('btn--outline');
+    $('showUserManagement').classList.add('btn--primary');
+  } else if (viewId === 'parkingManagement' && $('showParkingManagement')) {
+    $('showParkingManagement').classList.remove('btn--outline');
+    $('showParkingManagement').classList.add('btn--primary');
+  }
 }
 
-async function register(name, emp, pwd) {
-  const q = query(collection(db, 'users'), where('employeeNo', '==', emp));
-  if (!(await getDocs(q)).empty) throw new Error('工號已存在');
-  await addDoc(collection(db, 'users'), { name, employeeNo: emp, password: pwd, role: 'user' });
+function showError(elementId, message) {
+  const errorElement = $(elementId);
+  if (errorElement) {
+    errorElement.textContent = message;
+    errorElement.classList.remove('hidden');
+    setTimeout(() => {
+      errorElement.classList.add('hidden');
+    }, 5000);
+  }
+}
+
+function showModal(title, content) {
+  const modal = $('modal');
+  const modalTitle = $('modalTitle');
+  const modalBody = $('modalBody');
+  
+  if (modal && modalTitle && modalBody) {
+    modalTitle.textContent = title;
+    modalBody.innerHTML = content;
+    modal.classList.remove('hidden');
+    modal.classList.add('active');
+  }
+}
+
+function hideModal() {
+  const modal = $('modal');
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.classList.remove('active');
+  }
+}
+
+/* 認證功能 */
+async function login(employeeNo, password) {
+  try {
+    const q = query(collection(db, 'users'), where('employeeNo', '==', employeeNo));
+    const querySnapshot = await getDocs(q);
+    
+    if (querySnapshot.empty) {
+      throw new Error('找不到此工號');
+    }
+    
+    const userDoc = querySnapshot.docs[0];
+    const userData = { id: userDoc.id, ...userDoc.data() };
+    
+    if (userData.password !== password) {
+      throw new Error('密碼錯誤');
+    }
+    
+    return userData;
+  } catch (error) {
+    throw error;
+  }
+}
+
+async function register(name, employeeNo, password) {
+  try {
+    // 檢查工號是否已存在
+    const q = query(collection(db, 'users'), where('employeeNo', '==', employeeNo));
+    const existingUsers = await getDocs(q);
+    
+    if (!existingUsers.empty) {
+      throw new Error('此工號已註冊');
+    }
+    
+    // 新增用戶
+    const newUser = {
+      name,
+      employeeNo,
+      password,
+      role: 'user'
+    };
+    
+    await addDoc(collection(db, 'users'), newUser);
+    return newUser;
+  } catch (error) {
+    throw error;
+  }
 }
 
 /* 初始化測試資料 */
 async function initializeTestData() {
   try {
+    console.log('檢查是否需要初始化測試資料...');
+    
     const usersSnapshot = await getDocs(collection(db, 'users'));
+    const parkingSnapshot = await getDocs(collection(db, 'parking'));
+    
     if (usersSnapshot.empty) {
-      console.log('初始化測試資料...');
-      for (const user of initData.users) {
+      console.log('初始化測試用戶資料...');
+      
+      const testUsers = [
+        {
+          name: "系統管理員",
+          employeeNo: "dedustb46",
+          password: "test0000",
+          role: "super"
+        },
+        {
+          name: "張三",
+          employeeNo: "EMP001",
+          password: "password123",
+          role: "user"
+        },
+        {
+          name: "李四",
+          employeeNo: "EMP002",
+          password: "password123",
+          role: "user"
+        }
+      ];
+      
+      for (const user of testUsers) {
         await addDoc(collection(db, 'users'), user);
       }
-      for (const slot of initData.parking) {
+    }
+    
+    if (parkingSnapshot.empty) {
+      console.log('初始化測試車位資料...');
+      
+      const testParking = [
+        {
+          slotNo: "A001",
+          type: "汽車",
+          building: "A",
+          ownerId: "EMP001",
+          ownerName: "張三",
+          status: "open",
+          reservedBy: null
+        },
+        {
+          slotNo: "A002",
+          type: "機車",
+          building: "A",
+          ownerId: "EMP002",
+          ownerName: "李四",
+          status: "closed",
+          reservedBy: null
+        },
+        {
+          slotNo: "B001",
+          type: "汽車",
+          building: "B",
+          ownerId: null,
+          ownerName: "未分配",
+          status: "available",
+          reservedBy: null
+        }
+      ];
+      
+      for (const slot of testParking) {
         await addDoc(collection(db, 'parking'), slot);
       }
-      console.log('測試資料初始化完成');
     }
+    
+    console.log('測試資料初始化完成');
   } catch (error) {
-    console.error('初始化失敗:', error);
+    console.error('初始化測試資料時發生錯誤:', error);
   }
 }
 
 /* 渲染函數 */
-const renderParking = () => {
-  const html = parking.map(s => `
-    <div class="parking-slot">
-      <div class="parking-slot-header">
-        <span>${s.slotNo}</span>
-        <span class="status-${s.status}">${getStatusText(s.status)}</span>
-      </div>
-      <p>棟別：${s.building}棟</p>
-      <p>種類：${s.type}</p>
-      <p>主人：${s.ownerName || '未分配'}</p>
-      ${s.reservedBy ? `<p>預約人：${getUserName(s.reservedBy)}</p>` : ''}
-      <div class="parking-slot-actions">
-        ${renderParkingActions(s)}
-      </div>
-    </div>
-  `).join('');
-  el.parkingSlots.innerHTML = html || '<p>目前沒有車位資料</p>';
-};
-
-const renderUsers = () => {
-  if (currentUser?.role !== 'super') return;
+function renderParkingSlots() {
+  const container = $('parkingSlots');
+  if (!container) return;
   
-  const html = users.map(u => `
+  if (parking.length === 0) {
+    container.innerHTML = '<div class="text-center"><p>目前沒有車位資料</p></div>';
+    return;
+  }
+  
+  const html = parking.map(slot => {
+    const statusText = getStatusText(slot.status);
+    const isOwner = currentUser && slot.ownerId === currentUser.employeeNo;
+    const canReserve = slot.status === 'open' && !isOwner;
+    const canOpen = isOwner && slot.status === 'closed';
+    const canClose = isOwner && slot.status === 'open';
+    const canCancelReservation = slot.reservedBy === currentUser?.employeeNo;
+    
+    return `
+      <div class="parking-slot">
+        <div class="parking-slot-header">
+          <span>${slot.slotNo}</span>
+          <span class="status-${slot.status}">${statusText}</span>
+        </div>
+        <div class="parking-slot-info">
+          <p><strong>棟別：</strong>${slot.building}棟</p>
+          <p><strong>種類：</strong>${slot.type}</p>
+          <p><strong>主人：</strong>${slot.ownerName || '未分配'}</p>
+          ${slot.reservedBy ? `<p><strong>預約人：</strong>${getUserNameByEmployeeNo(slot.reservedBy)}</p>` : ''}
+        </div>
+        <div class="parking-slot-actions">
+          ${canReserve ? `<button class="btn btn--primary btn--sm" onclick="reserveSlot('${slot.id}')">預約</button>` : ''}
+          ${canOpen ? `<button class="btn btn--success btn--sm" onclick="openSlot('${slot.id}')">開放</button>` : ''}
+          ${canClose ? `<button class="btn btn--warning btn--sm" onclick="closeSlot('${slot.id}')">關閉</button>` : ''}
+          ${canCancelReservation ? `<button class="btn btn--outline btn--sm" onclick="cancelReservation('${slot.id}')">取消預約</button>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+  
+  container.innerHTML = html;
+}
+
+function renderUsers() {
+  const container = $('usersList');
+  if (!container) {
+    console.error('找不到 usersList 元素');
+    return;
+  }
+  
+  console.log('渲染用戶列表，當前用戶:', currentUser);
+  console.log('用戶資料:', users);
+  
+  if (currentUser?.role !== 'super') {
+    container.innerHTML = '<div class="text-center"><p>需要管理員權限才能查看</p></div>';
+    return;
+  }
+  
+  if (users.length === 0) {
+    container.innerHTML = '<div class="text-center"><p>目前沒有會員資料</p></div>';
+    return;
+  }
+  
+  const html = users.map(user => `
     <div class="user-card">
       <div class="user-card-header">
-        <span class="user-name">${u.name}</span>
-        <span class="user-role">${u.role === 'super' ? '管理員' : '一般用戶'}</span>
+        <span class="user-name">${user.name}</span>
+        <span class="user-role">${user.role === 'super' ? '管理員' : '一般用戶'}</span>
       </div>
-      <p>工號：${u.employeeNo}</p>
+      <div class="user-info">
+        <p><strong>工號：</strong>${user.employeeNo}</p>
+        <p><strong>角色：</strong>${user.role === 'super' ? '管理員' : '一般用戶'}</p>
+      </div>
       <div class="user-card-actions">
-        <button class="btn btn--outline btn--sm" onclick="editUser('${u.id}')">編輯</button>
-        ${u.role !== 'super' ? `<button class="btn btn--outline btn--sm" onclick="deleteUser('${u.id}')">刪除</button>` : ''}
+        <button class="btn btn--outline btn--sm" onclick="editUser('${user.id}')">編輯</button>
+        ${user.role !== 'super' ? `<button class="btn btn--outline btn--sm" onclick="deleteUser('${user.id}')">刪除</button>` : ''}
       </div>
     </div>
   `).join('');
-  el.usersList.innerHTML = html || '<p>目前沒有會員資料</p>';
-};
-
-const renderParkingManagement = () => {
-  if (currentUser?.role !== 'super') return;
   
-  const html = parking.map(s => `
+  container.innerHTML = html;
+}
+
+function renderParkingManagement() {
+  const container = $('parkingManagementList');
+  if (!container) {
+    console.error('找不到 parkingManagementList 元素');
+    return;
+  }
+  
+  console.log('渲染車位管理，當前用戶:', currentUser);
+  console.log('車位資料:', parking);
+  
+  if (currentUser?.role !== 'super') {
+    container.innerHTML = '<div class="text-center"><p>需要管理員權限才能查看</p></div>';
+    return;
+  }
+  
+  if (parking.length === 0) {
+    container.innerHTML = '<div class="text-center"><p>目前沒有車位資料</p></div>';
+    return;
+  }
+  
+  const html = parking.map(slot => `
     <div class="parking-card">
       <div class="parking-slot-header">
-        <span>${s.slotNo}</span>
-        <span class="status-${s.status}">${getStatusText(s.status)}</span>
+        <span>${slot.slotNo}</span>
+        <span class="status-${slot.status}">${getStatusText(slot.status)}</span>
       </div>
-      <p>棟別：${s.building}棟</p>
-      <p>種類：${s.type}</p>
-      <p>主人：${s.ownerName || '未分配'}</p>
+      <div class="parking-info">
+        <p><strong>棟別：</strong>${slot.building}棟</p>
+        <p><strong>種類：</strong>${slot.type}</p>
+        <p><strong>主人：</strong>${slot.ownerName || '未分配'}</p>
+        <p><strong>狀態：</strong>${getStatusText(slot.status)}</p>
+      </div>
       <div class="parking-card-actions">
-        <button class="btn btn--outline btn--sm" onclick="editParking('${s.id}')">編輯</button>
-        <button class="btn btn--outline btn--sm" onclick="assignOwner('${s.id}')">分配主人</button>
-        <button class="btn btn--outline btn--sm" onclick="deleteParking('${s.id}')">刪除</button>
+        <button class="btn btn--outline btn--sm" onclick="editParking('${slot.id}')">編輯</button>
+        <button class="btn btn--outline btn--sm" onclick="assignOwner('${slot.id}')">分配主人</button>
+        <button class="btn btn--outline btn--sm" onclick="deleteParking('${slot.id}')">刪除</button>
       </div>
     </div>
   `).join('');
-  el.parkingManagementList.innerHTML = html || '<p>目前沒有車位資料</p>';
-};
-
-/* 車位操作按鈕渲染 */
-const renderParkingActions = (slot) => {
-  const isOwner = currentUser && slot.ownerId === currentUser.employeeNo;
-  const canReserve = slot.status === 'open' && !isOwner;
-  const canOpen = isOwner && slot.status === 'closed';
-  const canClose = isOwner && slot.status === 'open';
-  const canCancel = slot.reservedBy === currentUser?.employeeNo;
   
-  let actions = [];
-  if (canReserve) actions.push(`<button class="btn btn--primary btn--sm" onclick="reserveSlot('${slot.id}')">預約</button>`);
-  if (canOpen) actions.push(`<button class="btn btn--success btn--sm" onclick="openSlot('${slot.id}')">開放</button>`);
-  if (canClose) actions.push(`<button class="btn btn--warning btn--sm" onclick="closeSlot('${slot.id}')">關閉</button>`);
-  if (canCancel) actions.push(`<button class="btn btn--outline btn--sm" onclick="cancelReservation('${slot.id}')">取消預約</button>`);
-  
-  return actions.join(' ');
-};
+  container.innerHTML = html;
+}
 
 /* 車位操作函數 */
 async function reserveSlot(slotId) {
-  await updateDoc(doc(db, 'parking', slotId), {
-    status: 'reserved',
-    reservedBy: currentUser.employeeNo
-  });
+  try {
+    await updateDoc(doc(db, 'parking', slotId), {
+      status: 'reserved',
+      reservedBy: currentUser.employeeNo
+    });
+    console.log('預約成功');
+  } catch (error) {
+    console.error('預約車位失敗:', error);
+    alert('預約失敗，請稍後再試');
+  }
 }
 
 async function openSlot(slotId) {
-  await updateDoc(doc(db, 'parking', slotId), {
-    status: 'open',
-    reservedBy: null
-  });
+  try {
+    await updateDoc(doc(db, 'parking', slotId), {
+      status: 'open',
+      reservedBy: null
+    });
+    console.log('開放成功');
+  } catch (error) {
+    console.error('開放車位失敗:', error);
+    alert('開放失敗，請稍後再試');
+  }
 }
 
 async function closeSlot(slotId) {
-  await updateDoc(doc(db, 'parking', slotId), {
-    status: 'closed',
-    reservedBy: null
-  });
+  try {
+    await updateDoc(doc(db, 'parking', slotId), {
+      status: 'closed',
+      reservedBy: null
+    });
+    console.log('關閉成功');
+  } catch (error) {
+    console.error('關閉車位失敗:', error);
+    alert('關閉失敗，請稍後再試');
+  }
 }
 
 async function cancelReservation(slotId) {
-  await updateDoc(doc(db, 'parking', slotId), {
-    status: 'open',
-    reservedBy: null
-  });
+  try {
+    await updateDoc(doc(db, 'parking', slotId), {
+      status: 'open',
+      reservedBy: null
+    });
+    console.log('取消預約成功');
+  } catch (error) {
+    console.error('取消預約失敗:', error);
+    alert('取消預約失敗，請稍後再試');
+  }
 }
 
-/* Super User 管理功能 */
+/* 管理功能 - 模態框 */
 function showAddUserModal() {
+  console.log('顯示新增用戶模態框');
   const content = `
     <form class="modal-form" onsubmit="addUser(event)">
       <div class="form-group">
@@ -301,6 +450,7 @@ function showAddUserModal() {
 }
 
 function showAddParkingModal() {
+  console.log('顯示新增車位模態框');
   const content = `
     <form class="modal-form" onsubmit="addParking(event)">
       <div class="form-group">
@@ -332,39 +482,59 @@ function showAddParkingModal() {
   showModal('新增車位', content);
 }
 
+/* CRUD 操作 */
 async function addUser(event) {
   event.preventDefault();
+  console.log('執行新增用戶');
+  
   try {
     const name = $('modalUserName').value;
     const employeeNo = $('modalUserEmployeeNo').value;
     const password = $('modalUserPassword').value;
     const role = $('modalUserRole').value;
     
-    await addDoc(collection(db, 'users'), { name, employeeNo, password, role });
+    console.log('新增用戶資料:', { name, employeeNo, role });
+    
+    await addDoc(collection(db, 'users'), {
+      name,
+      employeeNo,
+      password,
+      role
+    });
+    
     hideModal();
     alert('新增成功！');
   } catch (error) {
+    console.error('新增用戶失敗:', error);
     alert('新增失敗：' + error.message);
   }
 }
 
 async function addParking(event) {
   event.preventDefault();
+  console.log('執行新增車位');
+  
   try {
     const slotNo = $('modalSlotNo').value;
     const type = $('modalSlotType').value;
     const building = $('modalSlotBuilding').value;
     
+    console.log('新增車位資料:', { slotNo, type, building });
+    
     await addDoc(collection(db, 'parking'), {
-      slotNo, type, building,
+      slotNo,
+      type,
+      building,
       ownerId: null,
       ownerName: '未分配',
       status: 'available',
       reservedBy: null
     });
+    
     hideModal();
     alert('新增成功！');
   } catch (error) {
+    console.error('新增車位失敗:', error);
     alert('新增失敗：' + error.message);
   }
 }
@@ -375,6 +545,7 @@ async function deleteUser(userId) {
       await deleteDoc(doc(db, 'users', userId));
       alert('刪除成功！');
     } catch (error) {
+      console.error('刪除用戶失敗:', error);
       alert('刪除失敗：' + error.message);
     }
   }
@@ -386,6 +557,7 @@ async function deleteParking(parkingId) {
       await deleteDoc(doc(db, 'parking', parkingId));
       alert('刪除成功！');
     } catch (error) {
+      console.error('刪除車位失敗:', error);
       alert('刪除失敗：' + error.message);
     }
   }
@@ -429,6 +601,7 @@ async function updateUser(event, userId) {
     hideModal();
     alert('更新成功！');
   } catch (error) {
+    console.error('更新用戶失敗:', error);
     alert('更新失敗：' + error.message);
   }
 }
@@ -479,6 +652,7 @@ async function updateParking(event, parkingId) {
     hideModal();
     alert('更新成功！');
   } catch (error) {
+    console.error('更新車位失敗:', error);
     alert('更新失敗：' + error.message);
   }
 }
@@ -520,6 +694,7 @@ async function updateParkingOwner(event, parkingId) {
     hideModal();
     alert('分配成功！');
   } catch (error) {
+    console.error('分配失敗:', error);
     alert('分配失敗：' + error.message);
   }
 }
@@ -535,85 +710,219 @@ function getStatusText(status) {
   return statusMap[status] || status;
 }
 
-function getUserName(employeeNo) {
+function getUserNameByEmployeeNo(employeeNo) {
   const user = users.find(u => u.employeeNo === employeeNo);
   return user ? user.name : employeeNo;
 }
 
-/* 即時監聽 */
-onSnapshot(collection(db, 'parking'), snap => {
-  parking = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  renderParking();
-  renderParkingManagement();
-});
+/* 即時監聽 Firestore 變更 */
+function setupRealtimeListeners() {
+  console.log('設定即時監聽器...');
+  
+  // 監聽車位變更
+  onSnapshot(collection(db, 'parking'), (snapshot) => {
+    console.log('車位資料更新');
+    parking = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    renderParkingSlots();
+    renderParkingManagement();
+  });
+  
+  // 監聽用戶變更
+  onSnapshot(collection(db, 'users'), (snapshot) => {
+    console.log('用戶資料更新');
+    users = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    renderUsers();
+  });
+}
 
-onSnapshot(collection(db, 'users'), snap => {
-  users = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  renderUsers();
-});
-
-/* 事件綁定 */
-document.addEventListener('DOMContentLoaded', async () => {
+/* 主要初始化函數 */
+async function initializeApp() {
+  console.log('開始初始化應用程式...');
+  
+  // 初始化 Firebase
+  const firebaseReady = await initFirebase();
+  if (!firebaseReady) {
+    alert('Firebase 連接失敗，請檢查網路連接');
+    return;
+  }
+  
   // 初始化測試資料
   await initializeTestData();
   
+  // 設定即時監聽器
+  setupRealtimeListeners();
+  
+  // 綁定基本事件
+  setupEventListeners();
+  
+  console.log('應用程式初始化完成');
+}
+
+/* 事件監聽器設定 */
+function setupEventListeners() {
+  console.log('設定事件監聽器...');
+  
   // 頁面切換
-  el.showRegister.onclick = () => showPage('registerPage');
-  el.showLogin.onclick = () => showPage('loginPage');
-
-  // 登入
-  el.loginForm.onsubmit = async e => {
-    e.preventDefault();
-    try {
-      currentUser = await login(el.employeeNo.value, el.password.value);
-      el.currentUser.textContent = currentUser.name;
-      
-      if (currentUser.role === 'super') {
-        el.adminNav.classList.remove('hidden');
-      } else {
-        el.adminNav.classList.add('hidden');
-      }
-      
-      showPage('mainApp');
-      showView('parkingView');
-    } catch (err) {
-      showError('loginError', err.message);
-    }
-  };
-
-  // 註冊
-  el.registerForm.onsubmit = async e => {
-    e.preventDefault();
-    try {
-      await register(el.regName.value, el.regEmployeeNo.value, el.regPassword.value);
-      alert('註冊成功！請登入。');
+  const showRegisterBtn = $('showRegister');
+  const showLoginBtn = $('showLogin');
+  
+  if (showRegisterBtn) {
+    showRegisterBtn.addEventListener('click', () => {
+      console.log('切換到註冊頁面');
+      showPage('registerPage');
+    });
+  }
+  
+  if (showLoginBtn) {
+    showLoginBtn.addEventListener('click', () => {
+      console.log('切換到登入頁面');
       showPage('loginPage');
-    } catch (err) {
-      showError('registerError', err.message);
+    });
+  }
+  
+  // 登入表單
+  const loginForm = $('loginForm');
+  if (loginForm) {
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      console.log('處理登入...');
+      
+      try {
+        const employeeNo = $('employeeNo').value;
+        const password = $('password').value;
+        
+        currentUser = await login(employeeNo, password);
+        console.log('登入成功:', currentUser);
+        
+        const currentUserSpan = $('currentUser');
+        if (currentUserSpan) {
+          currentUserSpan.textContent = currentUser.name;
+        }
+        
+        const adminNav = $('adminNav');
+        if (currentUser.role === 'super' && adminNav) {
+          adminNav.classList.remove('hidden');
+        } else if (adminNav) {
+          adminNav.classList.add('hidden');
+        }
+        
+        showPage('mainApp');
+        showView('parkingView');
+        
+        // 重新渲染所有內容以確保權限正確
+        renderUsers();
+        renderParkingManagement();
+        
+      } catch (error) {
+        console.error('登入失敗:', error);
+        showError('loginError', error.message);
+      }
+    });
+  }
+  
+  // 註冊表單
+  const registerForm = $('registerForm');
+  if (registerForm) {
+    registerForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      console.log('處理註冊...');
+      
+      try {
+        const name = $('regName').value;
+        const employeeNo = $('regEmployeeNo').value;
+        const password = $('regPassword').value;
+        
+        await register(name, employeeNo, password);
+        console.log('註冊成功');
+        
+        alert('註冊成功！請使用新帳號登入。');
+        showPage('loginPage');
+        
+      } catch (error) {
+        console.error('註冊失敗:', error);
+        showError('registerError', error.message);
+      }
+    });
+  }
+  
+  // 登出按鈕
+  const logoutBtn = $('logoutBtn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+      console.log('登出');
+      currentUser = null;
+      showPage('loginPage');
+    });
+  }
+  
+  // 管理選單切換
+  const showParkingViewBtn = $('showParkingView');
+  const showUserManagementBtn = $('showUserManagement');
+  const showParkingManagementBtn = $('showParkingManagement');
+  
+  if (showParkingViewBtn) {
+    showParkingViewBtn.addEventListener('click', () => {
+      console.log('切換到車位管理視圖');
+      showView('parkingView');
+    });
+  }
+  
+  if (showUserManagementBtn) {
+    showUserManagementBtn.addEventListener('click', () => {
+      console.log('切換到會員管理視圖');
+      showView('userManagement');
+      renderUsers(); // 確保重新渲染
+    });
+  }
+  
+  if (showParkingManagementBtn) {
+    showParkingManagementBtn.addEventListener('click', () => {
+      console.log('切換到車位設定視圖');
+      showView('parkingManagement');
+      renderParkingManagement(); // 確保重新渲染
+    });
+  }
+  
+  // 模態框關閉
+  const modalClose = $('modalClose');
+  if (modalClose) {
+    modalClose.addEventListener('click', hideModal);
+  }
+  
+  const modal = $('modal');
+  if (modal) {
+    const modalOverlay = modal.querySelector('.modal-overlay');
+    if (modalOverlay) {
+      modalOverlay.addEventListener('click', hideModal);
     }
-  };
-
-  // 登出
-  el.logoutBtn.onclick = () => {
-    currentUser = null;
-    showPage('loginPage');
-  };
-
-  // 管理選單
-  el.showParkingView.onclick = () => showView('parkingView');
-  el.showUserManagement.onclick = () => showView('userManagement');
-  el.showParkingManagement.onclick = () => showView('parkingManagement');
-
-  // 模態框
-  el.modalClose.onclick = hideModal;
-  el.modal.querySelector('.modal-overlay').onclick = hideModal;
-
+  }
+  
   // 新增按鈕
-  el.addUserBtn.onclick = showAddUserModal;
-  el.addParkingBtn.onclick = showAddParkingModal;
-});
+  const addUserBtn = $('addUserBtn');
+  const addParkingBtn = $('addParkingBtn');
+  
+  if (addUserBtn) {
+    addUserBtn.addEventListener('click', () => {
+      console.log('點擊新增會員按鈕');
+      showAddUserModal();
+    });
+  }
+  
+  if (addParkingBtn) {
+    addParkingBtn.addEventListener('click', () => {
+      console.log('點擊新增車位按鈕');
+      showAddParkingModal();
+    });
+  }
+}
 
-/* 全域函數 */
+/* 將函數暴露到全域範圍 */
 window.reserveSlot = reserveSlot;
 window.openSlot = openSlot;
 window.closeSlot = closeSlot;
@@ -631,3 +940,6 @@ window.assignOwner = assignOwner;
 window.showAddUserModal = showAddUserModal;
 window.showAddParkingModal = showAddParkingModal;
 window.hideModal = hideModal;
+
+/* 當 DOM 載入完成時初始化 */
+document.addEventListener('DOMContentLoaded', initializeApp);

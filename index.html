@@ -14,7 +14,6 @@
             <div class="card">
                 <div class="card__body">
                     <h1 class="login-title">停車位管理系統</h1>
-
                     <form id="loginForm" class="login-form">
                         <div class="form-group">
                             <label class="form-label" for="employeeNo">工號</label>
@@ -24,11 +23,10 @@
                             <label class="form-label" for="password">密碼</label>
                             <input id="password" type="password" class="form-control" required />
                         </div>
-                        <button class="btn btn--primary btn--full-width">登入</button>
+                        <button type="submit" class="btn btn--primary btn--full-width">登入</button>
                         <div id="loginError" class="error-message hidden"></div>
                     </form>
-
-                    <button id="showRegister" class="btn btn--secondary btn--full-width">註冊新帳號</button>
+                    <button id="showRegister" type="button" class="btn btn--secondary btn--full-width">註冊新帳號</button>
                 </div>
             </div>
         </div>
@@ -40,7 +38,6 @@
             <div class="card">
                 <div class="card__body">
                     <h1 class="login-title">註冊新帳號</h1>
-
                     <form id="registerForm" class="login-form">
                         <div class="form-group">
                             <label class="form-label" for="regName">姓名</label>
@@ -54,11 +51,10 @@
                             <label class="form-label" for="regPassword">密碼</label>
                             <input id="regPassword" type="password" class="form-control" required />
                         </div>
-                        <button class="btn btn--primary btn--full-width">註冊</button>
+                        <button type="submit" class="btn btn--primary btn--full-width">註冊</button>
                         <div id="registerError" class="error-message hidden"></div>
                     </form>
-
-                    <button id="showLogin" class="btn btn--outline btn--full-width">返回登入</button>
+                    <button id="showLogin" type="button" class="btn btn--outline btn--full-width">返回登入</button>
                 </div>
             </div>
         </div>
@@ -72,7 +68,7 @@
                 <h1 class="navbar-title">停車位管理系統</h1>
                 <div class="navbar-user">
                     <span id="currentUser" class="user-name"></span>
-                    <button id="logoutBtn" class="btn btn--outline">登出</button>
+                    <button id="logoutBtn" type="button" class="btn btn--outline">登出</button>
                 </div>
             </div>
         </nav>
@@ -80,9 +76,9 @@
         <!-- 管理員選單 -->
         <div id="adminNav" class="admin-nav hidden">
             <div class="container flex gap-8">
-                <button id="showParkingView"      class="btn btn--primary">車位管理</button>
-                <button id="showUserManagement"   class="btn btn--outline">會員管理</button>
-                <button id="showParkingManagement" class="btn btn--outline">車位設定</button>
+                <button id="showParkingView" type="button" class="btn btn--primary">車位管理</button>
+                <button id="showUserManagement" type="button" class="btn btn--outline">會員管理</button>
+                <button id="showParkingManagement" type="button" class="btn btn--outline">車位設定</button>
             </div>
         </div>
 
@@ -96,15 +92,18 @@
                             <label class="form-label" for="buildingFilter">棟別</label>
                             <select id="buildingFilter" class="form-control">
                                 <option value="">全部</option>
-                                <option value="A">A棟</option><option value="B">B棟</option>
-                                <option value="C">C棟</option><option value="D">D棟</option>
+                                <option value="A">A棟</option>
+                                <option value="B">B棟</option>
+                                <option value="C">C棟</option>
+                                <option value="D">D棟</option>
                             </select>
                         </div>
                         <div class="form-group">
                             <label class="form-label" for="typeFilter">車位種類</label>
                             <select id="typeFilter" class="form-control">
                                 <option value="">全部</option>
-                                <option value="汽車">汽車</option><option value="機車">機車</option>
+                                <option value="汽車">汽車</option>
+                                <option value="機車">機車</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -119,11 +118,6 @@
                         </div>
                     </div>
                 </section>
-
-                <div id="loadingSpinner" class="loading-spinner">
-                    <div class="spinner"></div><p>載入中...</p>
-                </div>
-
                 <div id="parkingSlots" class="parking-slots"></div>
             </div>
         </div>
@@ -133,7 +127,7 @@
             <div class="container">
                 <div class="management-header">
                     <h2>會員管理</h2>
-                    <button id="addUserBtn" class="btn btn--primary">新增會員</button>
+                    <button id="addUserBtn" type="button" class="btn btn--primary">新增會員</button>
                 </div>
                 <div id="usersList" class="users-grid"></div>
             </div>
@@ -144,7 +138,7 @@
             <div class="container">
                 <div class="management-header">
                     <h2>車位設定</h2>
-                    <button id="addParkingBtn" class="btn btn--primary">新增車位</button>
+                    <button id="addParkingBtn" type="button" class="btn btn--primary">新增車位</button>
                 </div>
                 <div id="parkingManagementList" class="parking-grid"></div>
             </div>
@@ -153,11 +147,11 @@
 
     <!-- 通用模態框 -->
     <div id="modal" class="modal hidden">
-        <div class="modal-overlay"></div>
+        <div class="modal-overlay" onclick="hideModal()"></div>
         <div class="modal-content">
             <div class="modal-header">
                 <h3 id="modalTitle"></h3>
-                <button id="modalClose" class="modal-close">&times;</button>
+                <button id="modalClose" type="button" class="modal-close" onclick="hideModal()">&times;</button>
             </div>
             <div id="modalBody" class="modal-body"></div>
         </div>
