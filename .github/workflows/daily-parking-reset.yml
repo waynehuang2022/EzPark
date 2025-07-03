@@ -18,7 +18,7 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '18'
-        cache: 'npm'
+        # 移除 cache: 'npm' 這行
     
     - name: Install dependencies
       run: |
@@ -93,7 +93,7 @@ jobs:
               console.log('沒有需要重置的車位');
             }
             
-            // 記錄執行歷史（可選）
+            // 記錄執行歷史
             await db.collection('system_logs').add({
               action: 'daily_parking_reset',
               timestamp: admin.firestore.FieldValue.serverTimestamp(),
