@@ -1,4 +1,4 @@
-/* 完整修正版 app.js - 解決所有按鈕和顯示問題 */
+/* 修正版 app.js - 解決命名衝突問題 */
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
 import {
   getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc,
@@ -741,8 +741,8 @@ function setupRealtimeListeners() {
   });
 }
 
-/* 主要初始化函數 */
-async function initializeApp() {
+/* 主要初始化函數 - 重新命名避免衝突 */
+async function initApp() {
   console.log('開始初始化應用程式...');
   
   // 初始化 Firebase
@@ -941,5 +941,5 @@ window.showAddUserModal = showAddUserModal;
 window.showAddParkingModal = showAddParkingModal;
 window.hideModal = hideModal;
 
-/* 當 DOM 載入完成時初始化 */
-document.addEventListener('DOMContentLoaded', initializeApp);
+/* 當 DOM 載入完成時初始化 - 使用重新命名的函數 */
+document.addEventListener('DOMContentLoaded', initApp);
