@@ -241,6 +241,9 @@ function renderParkingSlots() {
   const container = $('parkingSlots');
   if (!container) return;
   
+  // =============== 新增：用戶狀態檢查 ===============
+  console.log('渲染車位列表，當前用戶:', currentUser);
+  
   // 獲取篩選條件
   const buildingFilter = $('buildingFilter')?.value || '';
   const typeFilter = $('typeFilter')?.value || '';
@@ -277,13 +280,18 @@ function renderParkingSlots() {
   
   const html = filteredSlots.map(slot => {
     const statusText = getStatusText(slot.status);
-    const isOwner = currentUser && slot.ownerId === currentUser.employeeNo;
-    const isReservedByMe = slot.reservedBy === currentUser?.employeeNo;
+    
+    // =============== 增強：車主判斷邏輯 ===============
+    const isOwner = currentUser && currentUser.employeeNo && slot.ownerId === currentUser.employeeNo;
+    const isReservedByMe = currentUser && currentUser.employeeNo && slot.reservedBy === currentUser.employeeNo;
+    
+    console.log(`車位 ${slot.slotNo}: 主人=${slot.ownerId}, 當前用戶=${currentUser?.employeeNo}, 是車主=${isOwner}`);
     
     // 按鈕邏輯
     let actionButtons = '';
     
     if (isOwner) {
+      console.log(`為車位 ${slot.slotNo} 生成車主按鈕，狀態: ${slot.status}`);
       if (slot.status === 'closed') {
         actionButtons += `<button class="btn btn--success btn--sm" onclick="openSlot('${slot.id}')">開放車位</button>`;
       } else if (slot.status === 'open') {
@@ -808,8 +816,12 @@ function setupRealtimeListeners() {
       id: doc.id,
       ...doc.data()
     }));
-    renderParkingSlots();
-    renderParkingManagement();
+    
+    // =============== 修正：確保在有用戶登入的情況下正確渲染 ===============
+    setTimeout(() => {
+      renderParkingSlots();
+      renderParkingManagement();
+    }, 100); // 給一個短暫延遲確保狀態同步
   });
   
   // 監聽用戶變更
@@ -869,6 +881,7 @@ function setupEventListeners() {
   }
   
   // 登入表單
+  // 登入表單
   const loginForm = $('loginForm');
   if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
@@ -879,14 +892,17 @@ function setupEventListeners() {
         const employeeNo = $('employeeNo').value;
         const password = $('password').value;
         
+        // 設置當前用戶
         currentUser = await login(employeeNo, password);
         console.log('登入成功:', currentUser);
         
+        // 更新用戶顯示
         const currentUserSpan = $('currentUser');
         if (currentUserSpan) {
           currentUserSpan.textContent = currentUser.name;
         }
         
+        // 設置管理員選單顯示
         const adminNav = $('adminNav');
         if (currentUser.role === 'super' && adminNav) {
           adminNav.classList.remove('hidden');
@@ -894,12 +910,19 @@ function setupEventListeners() {
           adminNav.classList.add('hidden');
         }
         
+        // 切換到主應用頁面
         showPage('mainApp');
         showView('parkingView');
         
-        // 重新渲染所有內容以確保權限正確
-        renderUsers();
-        renderParkingManagement();
+        // =============== 關鍵修正：強制重新渲染所有內容 ===============
+        console.log('登入後重新渲染車位列表...');
+        renderParkingSlots();  // 立即渲染車位列表以反映正確權限
+        
+        // 如果是管理員，也渲染管理內容
+        if (currentUser.role === 'super') {
+          renderUsers();
+          renderParkingManagement();
+        }
         
       } catch (error) {
         console.error('登入失敗:', error);
