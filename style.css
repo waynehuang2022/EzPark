@@ -201,6 +201,48 @@ body {
   background: var(--color-surface);
   box-shadow: var(--shadow-sm);
 }
+
+/* 空狀態樣式 */
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-base);
+  margin: 24px 0;
+}
+
+.empty-state h3 {
+  color: var(--color-text);
+  margin-bottom: 8px;
+  font-size: 18px;
+}
+
+.empty-state p {
+  color: #6b7280;
+  margin-bottom: 16px;
+}
+
+/* 篩選區域樣式增強 */
+.filter-section {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-base);
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.filter-section h2 {
+  margin-bottom: 16px;
+  color: var(--color-primary);
+  font-size: 18px;
+}
+
+.filter-controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
 .parking-slot-header {
   display: flex;
   justify-content: space-between;
