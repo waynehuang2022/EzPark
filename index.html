@@ -1,146 +1,130 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>停車位管理系統</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
-    <!-- 登入頁面 -->
+    <!-- 登入頁 -->
     <div id="loginPage" class="page active">
-        <div class="container">
-            <div class="login-container">
-                <div class="card">
-                    <div class="card__body">
-                        <h1 class="login-title">停車位管理系統</h1>
-                        <form id="loginForm" class="login-form">
-                            <div class="form-group">
-                                <label class="form-label" for="employeeNo">工號</label>
-                                <input type="text" id="employeeNo" class="form-control" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" for="password">密碼</label>
-                                <input type="password" id="password" class="form-control" required>
-                            </div>
-                            <button type="submit" class="btn btn--primary btn--full-width">登入</button>
-                        </form>
-                        <div class="register-link">
-                            <button type="button" class="btn btn--secondary btn--full-width" id="showRegister">註冊新帳號</button>
+        <div class="login-container">
+            <div class="card">
+                <div class="card__body">
+                    <h1 class="login-title">停車位管理系統</h1>
+
+                    <form id="loginForm" class="login-form">
+                        <div class="form-group">
+                            <label class="form-label" for="employeeNo">工號</label>
+                            <input id="employeeNo" class="form-control" required />
                         </div>
+                        <div class="form-group">
+                            <label class="form-label" for="password">密碼</label>
+                            <input id="password" type="password" class="form-control" required />
+                        </div>
+                        <button class="btn btn--primary btn--full-width">登入</button>
                         <div id="loginError" class="error-message hidden"></div>
-                    </div>
+                    </form>
+
+                    <button id="showRegister" class="btn btn--secondary btn--full-width">註冊新帳號</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 註冊頁面 -->
+    <!-- 註冊頁 -->
     <div id="registerPage" class="page">
-        <div class="container">
-            <div class="login-container">
-                <div class="card">
-                    <div class="card__body">
-                        <h1 class="login-title">註冊新帳號</h1>
-                        <form id="registerForm" class="login-form">
-                            <div class="form-group">
-                                <label class="form-label" for="regName">姓名</label>
-                                <input type="text" id="regName" class="form-control" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" for="regEmployeeNo">工號</label>
-                                <input type="text" id="regEmployeeNo" class="form-control" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" for="regPassword">密碼</label>
-                                <input type="password" id="regPassword" class="form-control" required>
-                            </div>
-                            <button type="submit" class="btn btn--primary btn--full-width">註冊</button>
-                        </form>
-                        <div class="register-link">
-                            <button type="button" class="btn btn--secondary btn--full-width" id="showLogin">返回登入</button>
+        <div class="login-container">
+            <div class="card">
+                <div class="card__body">
+                    <h1 class="login-title">註冊新帳號</h1>
+
+                    <form id="registerForm" class="login-form">
+                        <div class="form-group">
+                            <label class="form-label" for="regName">姓名</label>
+                            <input id="regName" class="form-control" required />
                         </div>
+                        <div class="form-group">
+                            <label class="form-label" for="regEmployeeNo">工號</label>
+                            <input id="regEmployeeNo" class="form-control" required />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="regPassword">密碼</label>
+                            <input id="regPassword" type="password" class="form-control" required />
+                        </div>
+                        <button class="btn btn--primary btn--full-width">註冊</button>
                         <div id="registerError" class="error-message hidden"></div>
-                    </div>
+                    </form>
+
+                    <button id="showLogin" class="btn btn--outline btn--full-width">返回登入</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 主要應用頁面 -->
+    <!-- 主應用 -->
     <div id="mainApp" class="page">
-        <!-- 導航列 -->
+        <!-- 導覽列 -->
         <nav class="navbar">
-            <div class="container flex items-center justify-between">
-                <h2 class="navbar-title">停車位管理系統</h2>
+            <div class="container flex justify-between items-center">
+                <h1 class="navbar-title">停車位管理系統</h1>
                 <div class="navbar-user">
                     <span id="currentUser" class="user-name"></span>
-                    <button id="logoutBtn" class="btn btn--secondary btn--sm">登出</button>
+                    <button id="logoutBtn" class="btn btn--outline">登出</button>
                 </div>
             </div>
         </nav>
 
-        <!-- 管理後台導航 (僅Super User可見) -->
+        <!-- 管理員選單 -->
         <div id="adminNav" class="admin-nav hidden">
-            <div class="container">
-                <div class="flex gap-16">
-                    <button id="showParkingView" class="btn btn--outline">車位管理</button>
-                    <button id="showUserManagement" class="btn btn--outline">會員管理</button>
-                    <button id="showParkingManagement" class="btn btn--outline">車位設定</button>
-                </div>
+            <div class="container flex gap-8">
+                <button id="showParkingView"      class="btn btn--primary">車位管理</button>
+                <button id="showUserManagement"   class="btn btn--outline">會員管理</button>
+                <button id="showParkingManagement" class="btn btn--outline">車位設定</button>
             </div>
         </div>
 
         <!-- 車位管理視圖 -->
         <div id="parkingView" class="content-view active">
             <div class="container">
-                <!-- 篩選器 -->
-                <div class="filter-section">
-                    <div class="card">
-                        <div class="card__body">
-                            <h3>篩選車位</h3>
-                            <div class="filter-controls">
-                                <div class="form-group">
-                                    <label class="form-label" for="buildingFilter">棟別</label>
-                                    <select id="buildingFilter" class="form-control">
-                                        <option value="">全部</option>
-                                        <option value="A">A棟</option>
-                                        <option value="B">B棟</option>
-                                        <option value="C">C棟</option>
-                                        <option value="D">D棟</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label" for="typeFilter">車位種類</label>
-                                    <select id="typeFilter" class="form-control">
-                                        <option value="">全部</option>
-                                        <option value="汽車">汽車</option>
-                                        <option value="機車">機車</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label" for="statusFilter">狀態</label>
-                                    <select id="statusFilter" class="form-control">
-                                        <option value="">全部</option>
-                                        <option value="open">開放</option>
-                                        <option value="closed">關閉</option>
-                                        <option value="reserved">已預約</option>
-                                        <option value="available">可分配</option>
-                                    </select>
-                                </div>
-                            </div>
+                <section class="filter-section">
+                    <h2>篩選車位</h2>
+                    <div class="filter-controls">
+                        <div class="form-group">
+                            <label class="form-label" for="buildingFilter">棟別</label>
+                            <select id="buildingFilter" class="form-control">
+                                <option value="">全部</option>
+                                <option value="A">A棟</option><option value="B">B棟</option>
+                                <option value="C">C棟</option><option value="D">D棟</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="typeFilter">車位種類</label>
+                            <select id="typeFilter" class="form-control">
+                                <option value="">全部</option>
+                                <option value="汽車">汽車</option><option value="機車">機車</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="statusFilter">狀態</label>
+                            <select id="statusFilter" class="form-control">
+                                <option value="">全部</option>
+                                <option value="open">開放</option>
+                                <option value="closed">關閉</option>
+                                <option value="reserved">已預約</option>
+                                <option value="available">可分配</option>
+                            </select>
                         </div>
                     </div>
+                </section>
+
+                <div id="loadingSpinner" class="loading-spinner">
+                    <div class="spinner"></div><p>載入中...</p>
                 </div>
 
-                <!-- 車位列表 -->
-                <div class="parking-list">
-                    <div id="loadingSpinner" class="loading-spinner">
-                        <div class="spinner"></div>
-                        <p>載入中...</p>
-                    </div>
-                    <div id="parkingSlots" class="parking-slots"></div>
-                </div>
+                <div id="parkingSlots" class="parking-slots"></div>
             </div>
         </div>
 
@@ -151,9 +135,7 @@
                     <h2>會員管理</h2>
                     <button id="addUserBtn" class="btn btn--primary">新增會員</button>
                 </div>
-                <div class="user-list">
-                    <div id="usersList" class="users-grid"></div>
-                </div>
+                <div id="usersList" class="users-grid"></div>
             </div>
         </div>
 
@@ -164,14 +146,12 @@
                     <h2>車位設定</h2>
                     <button id="addParkingBtn" class="btn btn--primary">新增車位</button>
                 </div>
-                <div class="parking-management-list">
-                    <div id="parkingManagementList" class="parking-grid"></div>
-                </div>
+                <div id="parkingManagementList" class="parking-grid"></div>
             </div>
         </div>
     </div>
 
-    <!-- 模態框 -->
+    <!-- 通用模態框 -->
     <div id="modal" class="modal hidden">
         <div class="modal-overlay"></div>
         <div class="modal-content">
@@ -179,11 +159,11 @@
                 <h3 id="modalTitle"></h3>
                 <button id="modalClose" class="modal-close">&times;</button>
             </div>
-            <div class="modal-body" id="modalBody"></div>
+            <div id="modalBody" class="modal-body"></div>
         </div>
     </div>
 
-    <!-- Firebase SDK -->
+    <!-- 主程式 -->
     <script type="module" src="app.js"></script>
 </body>
 </html>
