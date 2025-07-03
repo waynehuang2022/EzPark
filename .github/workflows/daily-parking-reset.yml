@@ -1,0 +1,128 @@
+name: Daily Parking Reset
+
+on:
+  schedule:
+    # 每天 UTC 08:00 執行（台灣時間 16:00）
+    - cron: '0 8 * * *'
+  workflow_dispatch: # 允許手動觸發
+
+jobs:
+  reset-parking:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: |
+        npm init -y
+        npm install firebase-admin
+    
+    - name: Create Firebase Admin script
+      run: |
+        cat > reset-parking.js << 'EOF'
+        const admin = require('firebase-admin');
+        
+        // 初始化 Firebase Admin SDK
+        const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+        
+        admin.initializeApp({
+          credential: admin.credential.cert(serviceAccount),
+          projectId: process.env.FIREBASE_PROJECT_ID
+        });
+        
+        const db = admin.firestore();
+        
+        async function resetAllParkingSlots() {
+          try {
+            console.log('開始重置所有車位...');
+            
+            // 設定台灣時間
+            const taiwanTime = new Date().toLocaleString('zh-TW', {
+              timeZone: 'Asia/Taipei',
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit'
+            });
+            
+            console.log(`執行時間（台灣時間）: ${taiwanTime}`);
+            
+            // 獲取所有車位
+            const parkingSnapshot = await db.collection('parking').get();
+            
+            if (parkingSnapshot.empty) {
+              console.log('沒有找到車位資料');
+              return;
+            }
+            
+            // 使用批次更新以提高效能
+            const batch = db.batch();
+            let updateCount = 0;
+            
+            parkingSnapshot.forEach((doc) => {
+              const data = doc.data();
+              
+              // 只更新有車位主人的車位（避免更新未分配的車位）
+              if (data.ownerId) {
+                batch.update(doc.ref, {
+                  status: 'closed',
+                  reservedBy: null,
+                  lastResetTime: admin.firestore.FieldValue.serverTimestamp()
+                });
+                updateCount++;
+                
+                console.log(`準備重置車位: ${data.slotNo} (主人: ${data.ownerName})`);
+              }
+            });
+            
+            // 執行批次更新
+            if (updateCount > 0) {
+              await batch.commit();
+              console.log(`✅ 成功重置 ${updateCount} 個車位`);
+            } else {
+              console.log('沒有需要重置的車位');
+            }
+            
+            // 記錄執行歷史（可選）
+            await db.collection('system_logs').add({
+              action: 'daily_parking_reset',
+              timestamp: admin.firestore.FieldValue.serverTimestamp(),
+              resetCount: updateCount,
+              executedBy: 'github_actions'
+            });
+            
+            console.log('車位重置作業完成');
+            
+          } catch (error) {
+            console.error('重置車位時發生錯誤:', error);
+            process.exit(1);
+          }
+        }
+        
+        // 執行重置作業
+        resetAllParkingSlots()
+          .then(() => {
+            console.log('程式執行完成');
+            process.exit(0);
+          })
+          .catch((error) => {
+            console.error('程式執行失敗:', error);
+            process.exit(1);
+          });
+        EOF
+    
+    - name: Reset parking slots
+      env:
+        FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+      run: node reset-parking.js
