@@ -277,7 +277,16 @@ function renderParkingSlots() {
     `;
     return;
   }
-  
+  // ======= 這裡插入排序邏輯 =======
+  if (currentUser && currentUser.employeeNo) {
+    filteredSlots.sort((a, b) => {
+      // 你的車位優先
+      if (a.ownerId === currentUser.employeeNo && b.ownerId !== currentUser.employeeNo) return -1;
+      if (a.ownerId !== currentUser.employeeNo && b.ownerId === currentUser.employeeNo) return 1;
+      return 0;
+    });
+  }
+// ======= 排序結束 =======
   const html = filteredSlots.map(slot => {
     const statusText = getStatusText(slot.status);
     
