@@ -437,19 +437,93 @@ function renderParkingManagement() {
   container.innerHTML = html;
 }
 
-/* 車位操作函數 */
+// /* 車位操作函數 */
+// async function reserveSlot(slotId) {
+//   try {
+//     await updateDoc(doc(db, 'parking', slotId), {
+//       status: 'reserved',
+//       reservedBy: currentUser.employeeNo
+//     });
+//     console.log('預約成功');
+//   } catch (error) {
+//     console.error('預約車位失敗:', error);
+//     alert('預約失敗，請稍後再試');
+//   }
+// }
+
+
+import { runTransaction, doc } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+
 async function reserveSlot(slotId) {
   try {
-    await updateDoc(doc(db, 'parking', slotId), {
-      status: 'reserved',
-      reservedBy: currentUser.employeeNo
+    const result = await runTransaction(db, async (transaction) => {
+      // 1. 先讀取車位當前狀態
+      const slotRef = doc(db, 'parking', slotId);
+      const slotDoc = await transaction.get(slotRef);
+      
+      if (!slotDoc.exists()) {
+        throw new Error('車位不存在');
+      }
+      
+      const slotData = slotDoc.data();
+      
+      // 2. 檢查車位是否仍然可以預約
+      if (slotData.status !== 'open') {
+        if (slotData.status === 'reserved') {
+          throw new Error('車位已被預約');
+        } else if (slotData.status === 'closed') {
+          throw new Error('車位已關閉');
+        } else {
+          throw new Error('車位不可預約');
+        }
+      }
+      
+      // 3. 檢查是否已有其他人預約
+      if (slotData.reservedBy && slotData.reservedBy !== currentUser.employeeNo) {
+        throw new Error('車位已被其他用戶預約');
+      }
+      
+      // 4. 檢查是否是車位主人（車位主人不能預約自己的車位）
+      if (slotData.ownerId === currentUser.employeeNo) {
+        throw new Error('不能預約自己的車位');
+      }
+      
+      // 5. 執行預約操作
+      transaction.update(slotRef, {
+        status: 'reserved',
+        reservedBy: currentUser.employeeNo,
+        reservedAt: new Date().toISOString()
+      });
+      
+      return {
+        success: true,
+        slotNo: slotData.slotNo,
+        ownerName: slotData.ownerName
+      };
     });
+    
+    // 6. 預約成功提示
     console.log('預約成功');
+    alert(`成功預約車位 ${result.slotNo}（車主：${result.ownerName}）`);
+    
   } catch (error) {
     console.error('預約車位失敗:', error);
-    alert('預約失敗，請稍後再試');
+    
+    // 7. 根據不同錯誤類型給予用戶適當提示
+    if (error.message.includes('已被預約')) {
+      alert('預約失敗：車位已被其他用戶預約，請選擇其他車位');
+    } else if (error.message.includes('已關閉')) {
+      alert('預約失敗：車位已關閉，無法預約');
+    } else if (error.message.includes('不能預約自己的車位')) {
+      alert('預約失敗：不能預約自己的車位');
+    } else if (error.code === 'aborted') {
+      alert('預約失敗：系統繁忙，請稍後再試');
+    } else {
+      alert('預約失敗：' + error.message);
+    }
   }
 }
+
 
 async function openSlot(slotId) {
   try {
