@@ -83,6 +83,16 @@ jobs:
                 
                 console.log(`準備重置車位: ${data.slotNo} (主人: ${data.ownerName})`);
               }
+                else if (!data.ownerId || data.ownerId === null) {
+              batch.update(doc.ref, {
+                status: 'open',
+                reservedBy: null,
+                lastResetTime: admin.firestore.FieldValue.serverTimestamp()
+              });
+              updateCount++;
+              
+              console.log(`準備重置車位: ${data.slotNo} (未分配) -> 開放`);
+            }
             });
             
             // 執行批次更新
