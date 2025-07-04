@@ -437,54 +437,20 @@ function renderParkingManagement() {
   container.innerHTML = html;
 }
 
-// /* 車位操作函數 */
-// async function reserveSlot(slotId) {
-//   try {
-//     await updateDoc(doc(db, 'parking', slotId), {
-//       status: 'reserved',
-//       reservedBy: currentUser.employeeNo
-//     });
-//     console.log('預約成功');
-//   } catch (error) {
-//     console.error('預約車位失敗:', error);
-//     alert('預約失敗，請稍後再試');
-//   }
-// }
+/* 車位操作函數 */
 async function reserveSlot(slotId) {
   try {
-    await runTransaction(db, async (transaction) => {
-      const slotRef = doc(db, 'parking', slotId);
-      const slotDoc = await transaction.get(slotRef);
-      
-      if (!slotDoc.exists()) {
-        throw new Error('車位不存在');
-      }
-      
-      const slotData = slotDoc.data();
-      
-      // 檢查車位狀態和預約權限
-      if (slotData.status !== 'open') {
-        throw new Error('車位不可預約');
-      }
-      
-      if (slotData.ownerId === currentUser.employeeNo) {
-        throw new Error('不能預約自己的車位');
-      }
-      
-      // 執行預約
-      transaction.update(slotRef, {
-        status: 'reserved',
-        reservedBy: currentUser.employeeNo
-      });
+    await updateDoc(doc(db, 'parking', slotId), {
+      status: 'reserved',
+      reservedBy: currentUser.employeeNo
     });
-    
     console.log('預約成功');
-    
   } catch (error) {
-    console.error('預約失敗:', error);
-    alert('預約失敗：' + error.message);
+    console.error('預約車位失敗:', error);
+    alert('預約失敗，請稍後再試');
   }
 }
+
 async function openSlot(slotId) {
   try {
     await updateDoc(doc(db, 'parking', slotId), {
