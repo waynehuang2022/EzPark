@@ -2,7 +2,7 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
 import {
   getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc,
-  query, where, onSnapshot, runTransaction, setDoc
+  query, where, onSnapshot, runTransaction, getDoc, setDoc
 } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
 
 /* Firebase 配置 */
