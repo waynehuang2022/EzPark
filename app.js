@@ -53,13 +53,14 @@ async function sendEmailNotification(parkingData) {
       minute: '2-digit'
     });
     
-    const templateParams = {
-      parking_slot: parkingData.slotNo,
-      owner_name: parkingData.ownerName,
-      building: parkingData.building,
-      parking_type: parkingData.type,
-      notification_time: taiwanTime
-    };
+  const templateParams = {
+    parking_slot: parkingData.slotNo,
+    owner_name: parkingData.ownerName,
+    building: parkingData.building,
+    parking_type: parkingData.type,
+    notification_time: taiwanTime,
+    to_email: email  // 這裡會動態設定收件人
+  };
     
     // 發送給每個收件人
     for (const email of recipients) {
