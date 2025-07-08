@@ -542,7 +542,7 @@ async function sendLineNotificationDirect(slotId, eventType) {
     // 獲取車位資料
     const slotData = parking.find(slot => slot.id === slotId);
     if (!slotData) return;
-    
+    console.log('新版本');
     // 獲取 LINE Bot 設定
     const configDoc = await getDoc(doc(db, 'system_config', 'line_bot'));
     if (!configDoc.exists()) {
