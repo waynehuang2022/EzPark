@@ -20,6 +20,88 @@ let currentUser = null;
 let parking = [];
 let users = [];
 
+/* EmailJS 設定 */
+const EMAIL_CONFIG = {
+  serviceId: 'service_a018oxe',        // 替換為您的 Service ID
+  templateId: 'template_dwec2kn',      // 替換為您的 Template ID
+  publicKey: 'KZ2hoSY4yHg2kmHEn'         // 替換為您的 Public Key
+};
+
+/* 初始化 EmailJS */
+function initEmailJS() {
+  emailjs.init(EMAIL_CONFIG.publicKey);
+  console.log('EmailJS 初始化完成');
+}
+
+/* 發送郵件通知 */
+async function sendEmailNotification(parkingData) {
+  try {
+    // 獲取收件人列表
+    const recipients = await getEmailRecipients();
+    
+    if (recipients.length === 0) {
+      console.log('沒有設定收件人');
+      return;
+    }
+    
+    const taiwanTime = new Date().toLocaleString('zh-TW', {
+      timeZone: 'Asia/Taipei',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+    
+    const templateParams = {
+      parking_slot: parkingData.slotNo,
+      owner_name: parkingData.ownerName,
+      building: parkingData.building,
+      parking_type: parkingData.type,
+      notification_time: taiwanTime
+    };
+    
+    // 發送給每個收件人
+    for (const email of recipients) {
+      templateParams.to_email = email;
+      
+      try {
+        await emailjs.send(
+          EMAIL_CONFIG.serviceId,
+          EMAIL_CONFIG.templateId,
+          templateParams
+        );
+        console.log(`郵件已發送給: ${email}`);
+      } catch (error) {
+        console.error(`發送給 ${email} 失敗:`, error);
+      }
+    }
+    
+    console.log(`郵件通知已發送給 ${recipients.length} 位收件人`);
+    
+  } catch (error) {
+    console.error('發送郵件通知失敗:', error);
+  }
+}
+
+/* 取得郵件收件人列表 */
+async function getEmailRecipients() {
+  try {
+    const configDoc = await getDoc(doc(db, 'system_config', 'email_notifications'));
+    
+    if (configDoc.exists()) {
+      const config = configDoc.data();
+      return config.recipients || [];
+    }
+    
+    return [];
+  } catch (error) {
+    console.error('取得收件人列表失敗:', error);
+    return [];
+  }
+}
+
+
 /* 初始化 Firebase */
 async function initFirebase() {
   try {
@@ -438,87 +520,19 @@ function renderParkingManagement() {
 }
 
 /* 車位操作函數 */
-// async function reserveSlot(slotId) {
-//   try {
-//     await updateDoc(doc(db, 'parking', slotId), {
-//       status: 'reserved',
-//       reservedBy: currentUser.employeeNo
-//     });
-//     console.log('預約成功');
-//   } catch (error) {
-//     console.error('預約車位失敗:', error);
-//     alert('預約失敗，請稍後再試');
-//   }
-// }
 async function reserveSlot(slotId) {
   try {
-    const result = await runTransaction(db, async (transaction) => {
-      // 1. 先讀取車位當前狀態
-      const slotRef = doc(db, 'parking', slotId);
-      const slotDoc = await transaction.get(slotRef);
-      
-      if (!slotDoc.exists()) {
-        throw new Error('車位不存在');
-      }
-      
-      const slotData = slotDoc.data();
-      
-      // 2. 檢查車位是否仍然可以預約
-      if (slotData.status !== 'open') {
-        if (slotData.status === 'reserved') {
-          throw new Error('車位已被預約');
-        } else if (slotData.status === 'closed') {
-          throw new Error('車位已關閉');
-        } else {
-          throw new Error('車位不可預約');
-        }
-      }
-      
-      // 3. 檢查是否已有其他人預約
-      if (slotData.reservedBy && slotData.reservedBy !== currentUser.employeeNo) {
-        throw new Error('車位已被其他用戶預約');
-      }
-      
-      // 4. 檢查是否是車位主人（車位主人不能預約自己的車位）
-      if (slotData.ownerId === currentUser.employeeNo) {
-        throw new Error('不能預約自己的車位');
-      }
-      
-      // 5. 執行預約操作
-      transaction.update(slotRef, {
-        status: 'reserved',
-        reservedBy: currentUser.employeeNo,
-        reservedAt: new Date().toISOString()
-      });
-      
-      return {
-        success: true,
-        slotNo: slotData.slotNo,
-        ownerName: slotData.ownerName
-      };
+    await updateDoc(doc(db, 'parking', slotId), {
+      status: 'reserved',
+      reservedBy: currentUser.employeeNo
     });
-    
-    // 6. 預約成功提示
     console.log('預約成功');
-    alert(`成功預約車位 ${result.slotNo}（車主：${result.ownerName}）`);
-    
   } catch (error) {
     console.error('預約車位失敗:', error);
-    
-    // 7. 根據不同錯誤類型給予用戶適當提示
-    if (error.message.includes('已被預約')) {
-      alert('預約失敗：車位已被其他用戶預約，請選擇其他車位');
-    } else if (error.message.includes('已關閉')) {
-      alert('預約失敗：車位已關閉，無法預約');
-    } else if (error.message.includes('不能預約自己的車位')) {
-      alert('預約失敗：不能預約自己的車位');
-    } else if (error.code === 'aborted') {
-      alert('預約失敗：系統繁忙，請稍後再試');
-    } else {
-      alert('預約失敗：' + error.message);
-    }
+    alert('預約失敗，請稍後再試');
   }
 }
+
 async function openSlot(slotId) {
   try {
     await updateDoc(doc(db, 'parking', slotId), {
@@ -526,65 +540,19 @@ async function openSlot(slotId) {
       reservedBy: null
     });
     console.log('開放成功');
-    // =============== 新增：直接發送 LINE 通知 ===============
+        // =============== 新增：發送郵件通知 ===============
     setTimeout(async () => {
-      await sendLineNotificationDirect(slotId, 'opened');
+      const slotData = parking.find(slot => slot.id === slotId);
+      if (slotData) {
+        await sendEmailNotification(slotData);
+      }
     }, 1000);
-
   } catch (error) {
     console.error('開放車位失敗:', error);
     alert('開放失敗，請稍後再試');
   }
 }
-/* 直接發送 LINE 通知的函數 */
-async function sendLineNotificationDirect(slotId, eventType) {
-  try {
-    // 獲取車位資料
-    const slotData = parking.find(slot => slot.id === slotId);
-    if (!slotData) return;
-    console.log('新版本');
-    // 獲取 LINE Bot 設定
-    const configDoc = await getDoc(doc(db, 'system_config', 'line_bot'));
-    if (!configDoc.exists()) {
-      console.log('LINE Bot 設定不存在');
-      return;
-    }
-    
-    const config = configDoc.data();
-    const accessToken = config.accessToken;
-    const recipients = config.recipients || []; // 收件人 LINE User ID 列表
-    
-    // 組成訊息內容
-    const taiwanTime = new Date().toLocaleString('zh-TW', {
-      timeZone: 'Asia/Taipei'
-    });
-    
-    const message = {
-      type: 'text',
-      text: `🅿️ 停車位開放通知\n\n車位：${slotData.slotNo}\n車主：${slotData.ownerName}\n棟別：${slotData.building}棟\n時間：${taiwanTime}\n\n現在可以預約此車位了！`
-    };
-    
-    // 發送給每個收件人
-    for (const userId of recipients) {
-      await fetch('https://api.line.me/v2/bot/message/push', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          to: userId,
-          messages: [message]
-        })
-      });
-    }
-    
-    console.log(`已發送 LINE 通知給 ${recipients.length} 位收件人`);
-    
-  } catch (error) {
-    console.error('發送 LINE 通知失敗:', error);
-  }
-}
+
 async function closeSlot(slotId) {
   try {
     await updateDoc(doc(db, 'parking', slotId), {
@@ -975,7 +943,8 @@ async function initApp() {
     alert('Firebase 連接失敗，請檢查網路連接');
     return;
   }
-  
+  // =============== 新增：初始化 EmailJS ===============
+  initEmailJS();
   // 初始化測試資料
   await initializeTestData();
   
