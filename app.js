@@ -2,7 +2,7 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
 import {
   getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc,
-  query, where, onSnapshot, runTransaction
+  query, where, onSnapshot, runTransaction, setDoc
 } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
 
 /* Firebase 配置 */
@@ -526,12 +526,65 @@ async function openSlot(slotId) {
       reservedBy: null
     });
     console.log('開放成功');
+    // =============== 新增：直接發送 LINE 通知 ===============
+    setTimeout(async () => {
+      await sendLineNotificationDirect(slotId, 'opened');
+    }, 1000);
+
   } catch (error) {
     console.error('開放車位失敗:', error);
     alert('開放失敗，請稍後再試');
   }
 }
-
+/* 直接發送 LINE 通知的函數 */
+async function sendLineNotificationDirect(slotId, eventType) {
+  try {
+    // 獲取車位資料
+    const slotData = parking.find(slot => slot.id === slotId);
+    if (!slotData) return;
+    
+    // 獲取 LINE Bot 設定
+    const configDoc = await getDoc(doc(db, 'system_config', 'line_bot'));
+    if (!configDoc.exists()) {
+      console.log('LINE Bot 設定不存在');
+      return;
+    }
+    
+    const config = configDoc.data();
+    const accessToken = config.accessToken;
+    const recipients = config.recipients || []; // 收件人 LINE User ID 列表
+    
+    // 組成訊息內容
+    const taiwanTime = new Date().toLocaleString('zh-TW', {
+      timeZone: 'Asia/Taipei'
+    });
+    
+    const message = {
+      type: 'text',
+      text: `🅿️ 停車位開放通知\n\n車位：${slotData.slotNo}\n車主：${slotData.ownerName}\n棟別：${slotData.building}棟\n時間：${taiwanTime}\n\n現在可以預約此車位了！`
+    };
+    
+    // 發送給每個收件人
+    for (const userId of recipients) {
+      await fetch('https://api.line.me/v2/bot/message/push', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          to: userId,
+          messages: [message]
+        })
+      });
+    }
+    
+    console.log(`已發送 LINE 通知給 ${recipients.length} 位收件人`);
+    
+  } catch (error) {
+    console.error('發送 LINE 通知失敗:', error);
+  }
+}
 async function closeSlot(slotId) {
   try {
     await updateDoc(doc(db, 'parking', slotId), {
