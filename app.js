@@ -34,6 +34,7 @@ function initEmailJS() {
 }
 
 /* 發送郵件通知 */
+/* 發送郵件通知 - 修正版 */
 async function sendEmailNotification(parkingData) {
   try {
     // 獲取收件人列表
@@ -53,18 +54,22 @@ async function sendEmailNotification(parkingData) {
       minute: '2-digit'
     });
     
-  const templateParams = {
-    parking_slot: parkingData.slotNo,
-    owner_name: parkingData.ownerName,
-    building: parkingData.building,
-    parking_type: parkingData.type,
-    notification_time: taiwanTime,
-    to_email: email  // 這裡會動態設定收件人
-  };
+    // ✅ 修正：先建立基本參數，不包含 to_email
+    const baseTemplateParams = {
+      parking_slot: parkingData.slotNo,
+      owner_name: parkingData.ownerName,
+      building: parkingData.building,
+      parking_type: parkingData.type,
+      notification_time: taiwanTime
+    };
     
     // 發送給每個收件人
     for (const email of recipients) {
-      templateParams.to_email = email;
+      // ✅ 修正：為每個收件人動態建立完整的參數
+      const templateParams = {
+        ...baseTemplateParams,
+        to_email: email
+      };
       
       try {
         await emailjs.send(
@@ -84,6 +89,7 @@ async function sendEmailNotification(parkingData) {
     console.error('發送郵件通知失敗:', error);
   }
 }
+
 
 /* 取得郵件收件人列表 */
 async function getEmailRecipients() {
