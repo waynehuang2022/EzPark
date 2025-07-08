@@ -53,7 +53,7 @@ async function sendEmailNotification(parkingData) {
       hour: '2-digit',
       minute: '2-digit'
     });
-    
+    console.log(`!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!`);
     // ✅ 修正：先建立基本參數，不包含 to_email
     const baseTemplateParams = {
       parking_slot: parkingData.slotNo,
