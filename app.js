@@ -33,17 +33,23 @@ function initEmailJS() {
   console.log('EmailJS 初始化完成');
 }
 
-/* 發送郵件通知 */
-/* 發送郵件通知 - 修正版 */
+/* 發送郵件通知 - 支援車位類型分類 */
 async function sendEmailNotification(parkingData) {
   try {
-    // 獲取收件人列表
-    const recipients = await getEmailRecipients();
+    console.log('=== 開始發送郵件通知 ===');
+    console.log('車位資料:', parkingData);
+    console.log('車位類型:', parkingData.type);
+    
+    // 根據車位類型獲取對應的收件人列表
+    const recipients = await getEmailRecipients(parkingData.type);
     
     if (recipients.length === 0) {
-      console.log('沒有設定收件人');
+      console.log(`沒有設定 ${parkingData.type} 車位的收件人`);
+      alert(`沒有設定 ${parkingData.type} 車位的收件人，請檢查郵件設定`);
       return;
     }
+    
+    console.log(`找到 ${recipients.length} 位 ${parkingData.type} 車位收件人:`, recipients);
     
     const taiwanTime = new Date().toLocaleString('zh-TW', {
       timeZone: 'Asia/Taipei',
@@ -53,8 +59,8 @@ async function sendEmailNotification(parkingData) {
       hour: '2-digit',
       minute: '2-digit'
     });
-    console.log(`!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!`);
-    // ✅ 修正：先建立基本參數，不包含 to_email
+    
+    // 建立基本郵件參數
     const baseTemplateParams = {
       parking_slot: parkingData.slotNo,
       owner_name: parkingData.ownerName,
@@ -64,8 +70,10 @@ async function sendEmailNotification(parkingData) {
     };
     
     // 發送給每個收件人
+    let successCount = 0;
+    let errorCount = 0;
+    
     for (const email of recipients) {
-      // ✅ 修正：為每個收件人動態建立完整的參數
       const templateParams = {
         ...baseTemplateParams,
         to_email: email
@@ -77,36 +85,81 @@ async function sendEmailNotification(parkingData) {
           EMAIL_CONFIG.templateId,
           templateParams
         );
-        console.log(`郵件已發送給: ${email}`);
+        console.log(`✅ 郵件已發送給: ${email}`);
+        successCount++;
       } catch (error) {
-        console.error(`發送給 ${email} 失敗:`, error);
+        console.error(`❌ 發送給 ${email} 失敗:`, error);
+        errorCount++;
       }
     }
     
-    console.log(`郵件通知已發送給 ${recipients.length} 位收件人`);
+    console.log('=== 郵件發送完成 ===');
+    console.log(`車位類型: ${parkingData.type}`);
+    console.log(`成功: ${successCount} 封，失敗: ${errorCount} 封`);
+    
+    // 顯示結果提示
+    if (successCount > 0) {
+      alert(`${parkingData.type} 車位開放通知已發送給 ${successCount} 位相關人員`);
+    }
+    if (errorCount > 0) {
+      alert(`有 ${errorCount} 封郵件發送失敗，請檢查設定`);
+    }
     
   } catch (error) {
     console.error('發送郵件通知失敗:', error);
+    alert('發送郵件通知失敗: ' + error.message);
   }
 }
 
 
-/* 取得郵件收件人列表 */
-async function getEmailRecipients() {
+
+/* 取得郵件收件人列表 - 支援車位類型分類 */
+async function getEmailRecipients(parkingType = null) {
   try {
     const configDoc = await getDoc(doc(db, 'system_config', 'email_notifications'));
     
-    if (configDoc.exists()) {
-      const config = configDoc.data();
-      return config.recipients || [];
+    if (!configDoc.exists()) {
+      console.log('郵件設定文檔不存在');
+      return [];
     }
     
+    const config = configDoc.data();
+    
+    // 檢查總開關是否啟用
+    if (!config.enabled) {
+      console.log('郵件通知功能已關閉');
+      return [];
+    }
+    
+    // 如果沒有指定車位類型，返回所有收件人
+    if (!parkingType) {
+      const allRecipients = [];
+      if (config.車位通知?.機車?.enabled && config.車位通知?.機車?.recipients) {
+        allRecipients.push(...config.車位通知.機車.recipients);
+      }
+      if (config.車位通知?.汽車?.enabled && config.車位通知?.汽車?.recipients) {
+        allRecipients.push(...config.車位通知.汽車.recipients);
+      }
+      // 去重複
+      return [...new Set(allRecipients)];
+    }
+    
+    // 根據車位類型返回對應的收件人
+    const typeConfig = config.車位通知?.[parkingType];
+    if (typeConfig?.enabled && typeConfig?.recipients) {
+      console.log(`取得 ${parkingType} 車位收件人:`, typeConfig.recipients);
+      return typeConfig.recipients;
+    }
+    
+    console.log(`${parkingType} 車位通知未啟用或無收件人`);
     return [];
+    
   } catch (error) {
     console.error('取得收件人列表失敗:', error);
     return [];
   }
 }
+
 
 
 /* 初始化 Firebase */
