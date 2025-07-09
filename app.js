@@ -160,7 +160,121 @@ async function getEmailRecipients(parkingType = null) {
   }
 }
 
+/* 顯示分類郵件通知設定 */
+function showCategorizedEmailSettings() {
+  const content = `
+    <form class="modal-form" onsubmit="updateCategorizedEmailSettings(event)">
+      <div class="form-group">
+        <label class="form-label">機車車位通知收件人（每行一個）</label>
+        <textarea id="motorcycleRecipients" class="form-control" rows="4" 
+                  placeholder="motorcycle-admin@company.com&#10;security@company.com"></textarea>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">汽車車位通知收件人（每行一個）</label>
+        <textarea id="carRecipients" class="form-control" rows="4" 
+                  placeholder="car-admin@company.com&#10;parking-manager@company.com&#10;admin@company.com"></textarea>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">啟用狀態</label>
+        <div class="checkbox-group">
+          <label><input type="checkbox" id="enableMotorcycle" checked> 啟用機車車位通知</label>
+          <label><input type="checkbox" id="enableCar" checked> 啟用汽車車位通知</label>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <button type="button" class="btn btn--outline" onclick="testCategorizedEmail()">測試分類通知</button>
+      </div>
+      
+      <div class="modal-actions">
+        <button type="button" class="btn btn--outline" onclick="hideModal()">取消</button>
+        <button type="submit" class="btn btn--primary">儲存設定</button>
+      </div>
+    </form>
+  `;
+  showModal('分類郵件通知設定', content);
+}
 
+/* 更新分類郵件設定 */
+async function updateCategorizedEmailSettings(event) {
+  event.preventDefault();
+  
+  try {
+    const motorcycleRecipients = $('motorcycleRecipients').value
+      .split('\n')
+      .map(email => email.trim())
+      .filter(email => email && email.includes('@'));
+    
+    const carRecipients = $('carRecipients').value
+      .split('\n')
+      .map(email => email.trim())
+      .filter(email => email && email.includes('@'));
+    
+    const settings = {
+      enabled: true,
+      車位通知: {
+        機車: {
+          recipients: motorcycleRecipients,
+          enabled: $('enableMotorcycle').checked
+        },
+        汽車: {
+          recipients: carRecipients,
+          enabled: $('enableCar').checked
+        }
+      },
+      lastUpdated: new Date().toISOString()
+    };
+    
+    await setDoc(doc(db, 'system_config', 'email_notifications'), settings);
+    
+    hideModal();
+    alert(`分類郵件設定已更新！\n機車收件人：${motorcycleRecipients.length} 位\n汽車收件人：${carRecipients.length} 位`);
+    
+  } catch (error) {
+    console.error('更新分類郵件設定失敗:', error);
+    alert('設定失敗：' + error.message);
+  }
+}
+
+/* 測試分類郵件發送 */
+async function testCategorizedEmail() {
+  try {
+    // 測試機車通知
+    const motorcycleTestData = {
+      slotNo: 'TEST-M001',
+      ownerName: '測試機車用戶',
+      building: 'A',
+      type: '機車'
+    };
+    
+    // 測試汽車通知
+    const carTestData = {
+      slotNo: 'TEST-C001',
+      ownerName: '測試汽車用戶',
+      building: 'B',
+      type: '汽車'
+    };
+    
+    console.log('開始測試分類郵件發送...');
+    
+    await sendEmailNotification(motorcycleTestData);
+    await new Promise(resolve => setTimeout(resolve, 2000)); // 等待2秒
+    await sendEmailNotification(carTestData);
+    
+    alert('測試郵件已發送，請檢查收件匣');
+    
+  } catch (error) {
+    console.error('測試分類郵件失敗:', error);
+    alert('測試失敗：' + error.message);
+  }
+}
+
+// 暴露到全域
+window.showCategorizedEmailSettings = showCategorizedEmailSettings;
+window.updateCategorizedEmailSettings = updateCategorizedEmailSettings;
+window.testCategorizedEmail = testCategorizedEmail;
 
 /* 初始化 Firebase */
 async function initFirebase() {
