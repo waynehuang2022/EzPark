@@ -98,12 +98,12 @@ async function sendEmailNotification(parkingData) {
     console.log(`成功: ${successCount} 封，失敗: ${errorCount} 封`);
     
     // 顯示結果提示
-    if (successCount > 0) {
-      alert(`${parkingData.type} 車位開放通知已發送給 ${successCount} 位相關人員`);
-    }
-    if (errorCount > 0) {
-      alert(`有 ${errorCount} 封郵件發送失敗，請檢查設定`);
-    }
+    // if (successCount > 0) {
+    //   alert(`${parkingData.type} 車位開放通知已發送給 ${successCount} 位相關人員`);
+    // }
+    // if (errorCount > 0) {
+    //   alert(`有 ${errorCount} 封郵件發送失敗，請檢查設定`);
+    // }
     
   } catch (error) {
     console.error('發送郵件通知失敗:', error);
